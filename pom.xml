@@ -190,6 +190,24 @@ language governing permissions and limitations under the License. -->
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.0.2</version>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.4.2</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <tagNameFormat>@{project.version}</tagNameFormat>
+                    <pushChanges>false</pushChanges>
+                    <localCheckout>true</localCheckout>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.scm</groupId>
+                        <artifactId>maven-scm-provider-gitexe</artifactId>
+                        <version>1.9</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
     </build>
 
@@ -293,16 +311,25 @@ language governing permissions and limitations under the License. -->
             <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
+
     <developers>
         <developer>
             <name>Bryan Bende</name>
         </developer>
     </developers>
+
     <scm>
         <connection>scm:git:git@github.com:bbende/tripod.git</connection>
         <developerConnection>scm:git:git@github.com:bbende/tripod.git</developerConnection>
         <tag>HEAD</tag>
         <url>git@github.com:bbende/tripod.git</url>
     </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>bbende-bintray-maven-repo</id>
+            <url>https://api.bintray.com/maven/bbende/maven-repo/tripod/;publish=1</url>
+        </repository>
+    </distributionManagement>
 
 </project>

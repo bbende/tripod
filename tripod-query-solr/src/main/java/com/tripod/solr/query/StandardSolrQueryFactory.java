@@ -17,18 +17,49 @@
 package com.tripod.solr.query;
 
 import com.tripod.api.query.Query;
+import com.tripod.api.query.Sort;
+import com.tripod.api.query.SortOrder;
 import org.apache.solr.client.solrj.SolrQuery;
 
 /**
+ * Standard factory for creating SolrQuery instances from the given Query.
  *
  * @author bbende
  */
-public class StandardSolrQueryFactory implements SolrQueryFactory<Query> {
+public class StandardSolrQueryFactory<Q extends Query> implements SolrQueryFactory<Q> {
 
     @Override
-    public SolrQuery create(final Query query) {
+    public SolrQuery create(final Q query) {
         final SolrQuery solrQuery = new SolrQuery(query.getQuery());
-        // TODO fill in the rest;
+        solrQuery.setStart(query.getOffset());
+        solrQuery.setRows(query.getRows());
+        solrQuery.setParam("q.op", query.getDefaultOperator().name());
+
+        if (query.getReturnFields() != null) {
+            query.getReturnFields().stream().forEach(f -> solrQuery.addField(f.getName()));
+        }
+
+        if (query.getHighlightFields() != null && !query.getHighlightFields().isEmpty()) {
+            solrQuery.setHighlight(true);
+            query.getHighlightFields().stream().forEach(hf -> solrQuery.addHighlightField(hf.getName()));
+        }
+
+        if (query.getFacetFields() != null) {
+            query.getFacetFields().stream().forEach(ff -> solrQuery.addFacetField(ff.getName()));
+        }
+
+        if (query.getSorts() != null) {
+            for (Sort sort : query.getSorts()) {
+                SolrQuery.ORDER solrOrder = sort.getSortOrder() == SortOrder.ASC ? SolrQuery.ORDER.asc : SolrQuery.ORDER.desc;
+                SolrQuery.SortClause sortClause = new SolrQuery.SortClause(sort.getField().getName(), solrOrder);
+                solrQuery.addSort(sortClause);
+            }
+        }
+
+        if (query.getFilterQueries() != null) {
+            query.getFilterQueries().stream().forEach(fq -> solrQuery.addFilterQuery(fq));
+        }
+
         return solrQuery;
     }
 

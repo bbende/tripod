@@ -16,31 +16,40 @@
  */
 package com.tripod.solr.service;
 
-import com.tripod.api.query.Query;
+import com.tripod.api.query.RetrievalQuery;
 import com.tripod.api.query.result.QueryResult;
 import com.tripod.api.query.result.QueryResults;
 import com.tripod.api.query.service.QueryException;
-import com.tripod.api.query.service.QueryService;
+import com.tripod.api.query.service.RetrievalService;
 import com.tripod.solr.query.SolrQueryFactory;
 import org.apache.solr.client.solrj.SolrClient;
 
 /**
- * Solr implementation of QueryService.
+ * Solr implementation of RetrievalService.
  *
  * @author bbende
  */
-public class SolrQueryService<Q extends Query, QR extends QueryResult> extends AbstractSolrService<Q,QR>
-        implements QueryService<Q,QR> {
+public class SolrRetrievalService<Q extends RetrievalQuery, QR extends QueryResult> extends AbstractSolrService<Q,QR>
+    implements RetrievalService<Q,QR> {
 
-    public SolrQueryService(final SolrClient solrClient,
-                            final SolrQueryFactory<Q> queryFactory,
-                            final SolrDocumentTransformer<QR> solrDocumentTransformer) {
+    public SolrRetrievalService(final SolrClient solrClient,
+                                final SolrQueryFactory<Q> queryFactory,
+                                final SolrDocumentTransformer<QR> solrDocumentTransformer) {
         super(solrClient, queryFactory, solrDocumentTransformer);
     }
 
     @Override
-    public QueryResults<QR> search(Q query) throws QueryException {
-        return performSearch(query);
+    public QR find(Q query) throws QueryException {
+        QueryResults<QR> results = performSearch(query);
+        if (results.getResults().size() > 1) {
+            throw new QueryException("RetrievalQuery returned more than one result");
+        }
+
+        if (results.getResults().size() == 0) {
+            return null;
+        } else {
+            return results.getResults().get(0);
+        }
     }
 
 }

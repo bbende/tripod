@@ -14,33 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.solr.service;
+package com.tripod.solr.example;
 
 import com.tripod.api.query.Query;
-import com.tripod.api.query.result.QueryResult;
-import com.tripod.api.query.result.QueryResults;
-import com.tripod.api.query.service.QueryException;
-import com.tripod.api.query.service.QueryService;
-import com.tripod.solr.query.SolrQueryFactory;
+import com.tripod.solr.query.StandardSolrQueryFactory;
+import com.tripod.solr.service.SolrQueryService;
 import org.apache.solr.client.solrj.SolrClient;
 
 /**
- * Solr implementation of QueryService.
+ * SolrQueryService implementation for ExampleSummary.
  *
  * @author bbende
  */
-public class SolrQueryService<Q extends Query, QR extends QueryResult> extends AbstractSolrService<Q,QR>
-        implements QueryService<Q,QR> {
+public class ExampleSummaryQueryService extends SolrQueryService<Query,ExampleSummary> {
 
-    public SolrQueryService(final SolrClient solrClient,
-                            final SolrQueryFactory<Q> queryFactory,
-                            final SolrDocumentTransformer<QR> solrDocumentTransformer) {
-        super(solrClient, queryFactory, solrDocumentTransformer);
-    }
-
-    @Override
-    public QueryResults<QR> search(Q query) throws QueryException {
-        return performSearch(query);
+    public ExampleSummaryQueryService(SolrClient solrClient) {
+        super(solrClient, new StandardSolrQueryFactory<>(), new ExampleSummaryTransformer());
     }
 
 }

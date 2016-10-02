@@ -14,33 +14,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.solr.service;
+package com.tripod.solr.example;
 
-import com.tripod.api.query.Query;
 import com.tripod.api.query.result.QueryResult;
-import com.tripod.api.query.result.QueryResults;
-import com.tripod.api.query.service.QueryException;
-import com.tripod.api.query.service.QueryService;
-import com.tripod.solr.query.SolrQueryFactory;
-import org.apache.solr.client.solrj.SolrClient;
+
+import java.util.Date;
 
 /**
- * Solr implementation of QueryService.
+ * Example for returning a full document, ExampleSummary would be the search result.
  *
  * @author bbende
  */
-public class SolrQueryService<Q extends Query, QR extends QueryResult> extends AbstractSolrService<Q,QR>
-        implements QueryService<Q,QR> {
+public class Example extends QueryResult<String> {
 
-    public SolrQueryService(final SolrClient solrClient,
-                            final SolrQueryFactory<Q> queryFactory,
-                            final SolrDocumentTransformer<QR> solrDocumentTransformer) {
-        super(solrClient, queryFactory, solrDocumentTransformer);
+    private String title;
+    private String body;
+    private Date createDate;
+
+    public Example(String s) {
+        super(s);
     }
 
-    @Override
-    public QueryResults<QR> search(Q query) throws QueryException {
-        return performSearch(query);
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
     }
 
 }

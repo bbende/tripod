@@ -41,7 +41,7 @@ public class Query {
     private List<Field> facetFields;
 
     private List<String> filterQueries;
-    private List<SortOrder> sortOrders;
+    private List<Sort> sorts;
 
     private Operator defaultOperator = Operator.AND;
 
@@ -105,12 +105,12 @@ public class Query {
         this.filterQueries = filterQueries;
     }
 
-    public List<SortOrder> getSortOrders() {
-        return sortOrders;
+    public List<Sort> getSorts() {
+        return sorts;
     }
 
-    public void setSortOrders(List<SortOrder> sortOrders) {
-        this.sortOrders = sortOrders;
+    public void setSorts(List<Sort> sorts) {
+        this.sorts = sorts;
     }
 
     public Operator getDefaultOperator() {

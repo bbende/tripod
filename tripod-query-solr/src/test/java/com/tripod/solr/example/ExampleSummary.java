@@ -14,33 +14,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.solr.service;
+package com.tripod.solr.example;
 
-import com.tripod.api.query.Query;
 import com.tripod.api.query.result.QueryResult;
-import com.tripod.api.query.result.QueryResults;
-import com.tripod.api.query.service.QueryException;
-import com.tripod.api.query.service.QueryService;
-import com.tripod.solr.query.SolrQueryFactory;
-import org.apache.solr.client.solrj.SolrClient;
+
+import java.util.Date;
 
 /**
- * Solr implementation of QueryService.
+ * Example QueryResult implementation for search result summary.
+ *
+ * This class would act as the "search result".
  *
  * @author bbende
  */
-public class SolrQueryService<Q extends Query, QR extends QueryResult> extends AbstractSolrService<Q,QR>
-        implements QueryService<Q,QR> {
+public class ExampleSummary extends QueryResult<String> {
 
-    public SolrQueryService(final SolrClient solrClient,
-                            final SolrQueryFactory<Q> queryFactory,
-                            final SolrDocumentTransformer<QR> solrDocumentTransformer) {
-        super(solrClient, queryFactory, solrDocumentTransformer);
+    private String title;
+    private Date createDate;
+
+    public ExampleSummary(String s) {
+        super(s);
     }
 
-    @Override
-    public QueryResults<QR> search(Q query) throws QueryException {
-        return performSearch(query);
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
     }
 
 }

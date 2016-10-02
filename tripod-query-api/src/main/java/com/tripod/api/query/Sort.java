@@ -14,17 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.solr;
+package com.tripod.api.query;
 
-import com.tripod.api.query.Transformer;
-import com.tripod.api.query.result.QueryResult;
-import org.apache.solr.common.SolrDocument;
+import org.apache.commons.lang.Validate;
 
 /**
- * Transforms a SolrDocument to the given type of QueryResult.
- *
  * @author bbende
  */
-public interface SolrDocumentTransformer<QR extends QueryResult> extends Transformer<SolrDocument,QR> {
+public class Sort {
+
+    private final Field field;
+
+    private final SortOrder sortOrder;
+
+    public Sort(Field field, SortOrder sortOrder) {
+        this.field = field;
+        this.sortOrder = sortOrder;
+        Validate.notNull(this.field);
+        Validate.notNull(this.sortOrder);
+    }
+
+    public Field getField() {
+        return field;
+    }
+
+    public SortOrder getSortOrder() {
+        return sortOrder;
+    }
 
 }

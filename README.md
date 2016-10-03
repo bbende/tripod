@@ -68,13 +68,13 @@ Creates an abstraction layer between the application and the underlying search p
         }
     }
     
-4) Create a transformer that can take a SolrDocument and produce the domain object above:
+4) Create a transformer that takes a SolrDocument and produces the domain object above:
 
     public class FooTransformer implements SolrDocumentTransformer<Foo> {
         @Override
         public Foo transform(SolrDocument input) {
-            String id = getString(input, ExampleField.ID.getName());
-            String title = getString(input, ExampleField.TITLE.getName());
+            String id = getString(input, FooField.ID.getName());
+            String title = getString(input, FooField.TITLE.getName());
             
             Foo foo = new Foo(id);
             foo.setTitle(title);
@@ -93,7 +93,7 @@ Creates an abstraction layer between the application and the underlying search p
 6) Initialize the query service with the appropriate SolrClient and perform queries:
 
     SolrClient solrClient = ...
-    FooQueryService queryService = new FooQueryService(solrClient);
+    QueryService<Query,Foo> queryService = new FooQueryService(solrClient);
     
     Query query = new Query("id:1");
     QueryResults<Foo> results = queryService.search(query);

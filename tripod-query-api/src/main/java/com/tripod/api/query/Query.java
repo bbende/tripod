@@ -18,7 +18,9 @@ package com.tripod.api.query;
 
 import org.apache.commons.lang.Validate;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Standard Query.
@@ -42,6 +44,8 @@ public class Query {
 
     private List<String> filterQueries;
     private List<Sort> sorts;
+
+    private Map<String,String> params = new HashMap<>();
 
     private Operator defaultOperator = Operator.AND;
 
@@ -119,6 +123,21 @@ public class Query {
 
     public void setDefaultOperator(Operator defaultOperator) {
         this.defaultOperator = defaultOperator;
+    }
+
+    public Map<String, String> getParams() {
+        return params;
+    }
+
+    public void setParams(Map<String, String> params) {
+        this.params = params;
+    }
+
+    public void addParam(String name, String value) {
+        if (params == null) {
+            this.params = new HashMap<>();
+        }
+        this.params.put(name, value);
     }
 
 }

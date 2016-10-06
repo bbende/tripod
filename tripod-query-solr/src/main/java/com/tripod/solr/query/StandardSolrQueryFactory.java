@@ -60,6 +60,10 @@ public class StandardSolrQueryFactory<Q extends Query> implements SolrQueryFacto
             query.getFilterQueries().stream().forEach(fq -> solrQuery.addFilterQuery(fq));
         }
 
+        if (query.getParams() != null) {
+            query.getParams().entrySet().stream().forEach(e -> solrQuery.add(e.getKey(), e.getValue()));
+        }
+
         return solrQuery;
     }
 

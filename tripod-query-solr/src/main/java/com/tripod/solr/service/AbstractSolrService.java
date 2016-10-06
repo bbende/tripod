@@ -42,6 +42,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Base class for all Solr services.
+ *
  * @author bbende
  */
 public class AbstractSolrService <Q extends Query, QR extends QueryResult> {
@@ -51,7 +53,7 @@ public class AbstractSolrService <Q extends Query, QR extends QueryResult> {
     protected final SolrClient solrClient;
     protected final SolrQueryFactory<Q> queryFactory;
     protected final SolrDocumentTransformer<QR> solrDocumentTransformer;
-    protected SolrRequest.METHOD method = SolrRequest.METHOD.GET;
+    protected SolrRequest.METHOD defaultMethod = SolrRequest.METHOD.GET;
 
     public AbstractSolrService(final SolrClient solrClient,
                                final SolrQueryFactory<Q> queryFactory,
@@ -64,9 +66,9 @@ public class AbstractSolrService <Q extends Query, QR extends QueryResult> {
         Validate.notNull(this.solrDocumentTransformer);
     }
 
-    public void setMethod(SolrRequest.METHOD method) {
+    public void setDefautMethod(SolrRequest.METHOD method) {
         Validate.notNull(method);
-        this.method = method;
+        this.defaultMethod = method;
     }
 
     /**
@@ -79,6 +81,7 @@ public class AbstractSolrService <Q extends Query, QR extends QueryResult> {
     protected QueryResults<QR> performSearch(Q query) throws QueryException {
         // Convert from Query API to SolrQuery
         final SolrQuery solrQuery = queryFactory.create(query);
+        final SolrRequest.METHOD method = getMethod(query);
 
         // Start the results builder with the offset and rows from the query
         final QueryResults.Builder<QR> resultsBuilder = new QueryResults.Builder<QR>()
@@ -118,6 +121,27 @@ public class AbstractSolrService <Q extends Query, QR extends QueryResult> {
         }
 
         return resultsBuilder.build();
+    }
+
+    /**
+     * Determine the request method.
+     *
+     * @param query incoming query
+     * @return the method on the query, or the default method
+     */
+    private SolrRequest.METHOD getMethod(Q query) {
+        SolrRequest.METHOD method = defaultMethod;
+        if (query.getRequestMethod() != null) {
+            switch (query.getRequestMethod()) {
+                case GET:
+                    method = SolrRequest.METHOD.GET;
+                    break;
+                case POST:
+                    method = SolrRequest.METHOD.POST;
+                    break;
+            }
+        }
+        return method;
     }
 
     /**

@@ -48,6 +48,7 @@ public class Query {
     private Map<String,String> params = new HashMap<>();
 
     private Operator defaultOperator = Operator.AND;
+    private RequestMethod requestMethod = RequestMethod.GET;
 
     public Query(final String query) {
         this(query, DEFAULT_OFFSET, DEFAULT_PAGE_SIZE);
@@ -138,6 +139,14 @@ public class Query {
             this.params = new HashMap<>();
         }
         this.params.put(name, value);
+    }
+
+    public RequestMethod getRequestMethod() {
+        return requestMethod;
+    }
+
+    public void setRequestMethod(RequestMethod requestMethod) {
+        this.requestMethod = requestMethod;
     }
 
 }

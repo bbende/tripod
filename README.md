@@ -13,9 +13,7 @@
   limitations under the License.
 -->
 
-[![Build Status](https://travis-ci.org/bbende/tripod.svg?branch=master)](https://travis-ci.org/bbende/tripod)
-
-# Tripod
+# Tripod [![Build Status](https://travis-ci.org/bbende/tripod.svg?branch=master)](https://travis-ci.org/bbende/tripod)
 
 A library for bootstrapping the development of search applications.
 

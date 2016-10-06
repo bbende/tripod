@@ -19,6 +19,7 @@ package com.tripod.solr.example;
 import com.tripod.api.query.Query;
 import com.tripod.api.query.result.QueryResults;
 import com.tripod.api.query.service.QueryException;
+import com.tripod.api.query.service.QueryService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +34,7 @@ import java.text.SimpleDateFormat;
  */
 public class TestExampleSummaryQueryService extends TestExampleBase {
 
-    private ExampleSummaryQueryService queryService;
+    private QueryService<Query,ExampleSummary> queryService;
 
     @Before
     public void setup() {

@@ -65,7 +65,7 @@ language governing permissions and limitations under the License. -->
                 <artifactId>apache-rat-plugin</artifactId>
                 <configuration>
                     <excludes combine.children="append">
-                        <exclude>src/test/resources/solr/exampleCollection/conf/params.json</exclude>
+                        <exclude>src/test/resources/configsets/exampleCollection/conf/params.json</exclude>
                     </excludes>
                 </configuration>
             </plugin>

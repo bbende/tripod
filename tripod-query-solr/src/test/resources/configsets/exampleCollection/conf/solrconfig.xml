@@ -15,20 +15,22 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<solr>
+<config>
+  <luceneMatchVersion>6.2.1</luceneMatchVersion>
 
-  <solrcloud>
-    <str name="host">${host:}</str>
-    <int name="hostPort">${jetty.port:8983}</int>
-    <str name="hostContext">${hostContext:solr}</str>
-    <int name="zkClientTimeout">${zkClientTimeout:30000}</int>
-    <bool name="genericCoreNodeNames">${genericCoreNodeNames:true}</bool>
-  </solrcloud>
+  <dataDir>${solr.data.dir:}</dataDir>
 
-  <shardHandlerFactory name="shardHandlerFactory"
-    class="HttpShardHandlerFactory">
-    <int name="socketTimeout">${socketTimeout:0}</int>
-    <int name="connTimeout">${connTimeout:0}</int>
-  </shardHandlerFactory>
+  <schemaFactory class="ClassicIndexSchemaFactory"/>
 
-</solr>
+  <indexConfig>
+    <lockType>single</lockType>
+  </indexConfig>
+
+  <requestDispatcher handleSelect="false">
+    <httpCaching never304="true" />
+  </requestDispatcher>
+
+  <requestHandler name="/select" class="solr.SearchHandler" />
+  <requestHandler name="/update" class="solr.UpdateRequestHandler" />
+
+</config>

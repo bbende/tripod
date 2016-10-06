@@ -18,62 +18,82 @@ package com.tripod.solr.util;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.solr.core.CoreContainer;
+import org.apache.solr.client.solrj.request.CoreAdminRequest;
+import org.apache.solr.core.NodeConfig;
+import org.apache.solr.core.SolrResourceLoader;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
+ * Factory for creating instances of EmbeddedSolrServer for testing.
+ *
  * @author bbende
  */
 public class EmbeddedSolrServerFactory {
 
-    public static final String DEFAULT_SOLR_HOME = "src/test/resources/solr";
+    public static final String DEFAULT_SOLR_HOME = EmbeddedSolrServerFactory.class
+            .getProtectionDomain().getCodeSource().getLocation().getFile() + "/../solr";
+
+    public static final String DEFAULT_CONFIGSET_DIR = "src/test/resources/configsets";
 
     /**
-     * Use the defaults to create the core.
-     *
-     * @param coreName the name of the core
-     * @return an EmbeddedSolrServer for the given core
+     * @param coreName the name of the core, must have a matching directory in configHome
+     * @return an EmbeddedSolrServer with a core created for the given coreName
      */
-    public static SolrClient create(String coreName) throws IOException {
-        final String dataDir = EmbeddedSolrServerFactory.class
-                .getProtectionDomain().getCodeSource().getLocation().getFile() + "../../target";
-
-        return create(DEFAULT_SOLR_HOME, coreName, dataDir);
+    public static SolrClient create(final String coreName)
+            throws IOException, SolrServerException {
+        return create(DEFAULT_SOLR_HOME, DEFAULT_CONFIGSET_DIR, coreName, true);
     }
 
     /**
-     *
-     * @param solrHome
-     *              path to directory where solr.xml lives
-     * @param coreName
-     *              the name of the core to load
-     * @param dataDir
-     *              the data dir for the core
-     *
-     * @return an EmbeddedSolrServer for the given core
+     * @param solrHome the Solr home directory to use
+     * @param configSetHome the directory containing config sets
+     * @param coreName the name of the core, must have a matching directory in configHome
+     * @return an EmbeddedSolrServer with a core created for the given coreName
      */
-    public static SolrClient create(String solrHome, String coreName, String dataDir)
-            throws IOException {
+    public static SolrClient create(final String solrHome, final String configSetHome, final String coreName)
+            throws IOException, SolrServerException {
+        return create(solrHome, configSetHome, coreName, true);
+    }
 
-        // TODO figure out how to set the dataDir actually use the target dir
-        // right now we are relying on using RAMDirectory to never write a dataDir
-        Map<String,String> props = new HashMap<>();
-        if (dataDir != null) {
-            File coreDataDir = new File(dataDir + "/" + coreName);
-            if (coreDataDir.exists()) {
-                FileUtils.deleteDirectory(coreDataDir);
-            }
-            props.put("dataDir", dataDir + "/" + coreName);
+    /**
+     * @param solrHome the Solr home directory to use
+     * @param configSetHome the directory containing config sets
+     * @param coreName the name of the core, must have a matching directory in configHome
+     * @param cleanSolrHome if true the directory for solrHome will be deleted and re-created if it already exists
+     * @return an EmbeddedSolrServer with a core created for the given coreName
+     */
+    public static SolrClient create(final String solrHome, final String configSetHome, final String coreName, final boolean cleanSolrHome)
+            throws IOException, SolrServerException {
+
+        final File solrHomeDir = new File(solrHome);
+        if (solrHomeDir.exists()) {
+            FileUtils.deleteDirectory(solrHomeDir);
+            solrHomeDir.mkdirs();
+        } else {
+            solrHomeDir.mkdirs();
         }
 
-        final CoreContainer coreContainer = new CoreContainer(solrHome);
-        coreContainer.load();
+        final SolrResourceLoader loader = new SolrResourceLoader(solrHomeDir.toPath());
+        final Path configSetPath = Paths.get(configSetHome).toAbsolutePath();
 
-        return new EmbeddedSolrServer(coreContainer, coreName);
+        final NodeConfig config = new NodeConfig.NodeConfigBuilder("embeddedSolrServerNode", loader)
+                .setConfigSetBaseDirectory(configSetPath.toString())
+                .build();
+
+        final EmbeddedSolrServer embeddedSolrServer = new EmbeddedSolrServer(config, coreName);
+
+        final CoreAdminRequest.Create createRequest = new CoreAdminRequest.Create();
+        createRequest.setCoreName(coreName);
+        createRequest.setConfigSet(coreName);
+        embeddedSolrServer.request(createRequest);
+
+        return embeddedSolrServer;
     }
+
 }

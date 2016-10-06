@@ -17,6 +17,8 @@
 package com.tripod.api.query;
 
 /**
+ * Search operators.
+ *
  * @author bbende
  */
 public enum Operator {

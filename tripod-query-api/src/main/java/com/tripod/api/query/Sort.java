@@ -16,9 +16,12 @@
  */
 package com.tripod.api.query;
 
+import com.tripod.api.Field;
 import org.apache.commons.lang.Validate;
 
 /**
+ * A sort clause for a query.
+ *
  * @author bbende
  */
 public class Sort {
@@ -42,4 +45,11 @@ public class Sort {
         return sortOrder;
     }
 
+    public static Sort asc(Field field) {
+        return new Sort(field, SortOrder.ASC);
+    }
+
+    public static Sort desc(Field field) {
+        return new Sort(field, SortOrder.DESC);
+    }
 }

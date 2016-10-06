@@ -14,28 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query;
+package com.tripod.api;
 
 /**
+ * Transforms the given input to the corresponding output.
+ *
  * @author bbende
  */
-public class SortField {
+public interface Transformer<I,O> {
 
-    private final Field field;
-
-    private final SortOrder sortOrder;
-
-    public SortField(Field field, SortOrder sortOrder) {
-        this.field = field;
-        this.sortOrder = sortOrder;
-    }
-
-    public Field getField() {
-        return field;
-    }
-
-    public SortOrder getSortOrder() {
-        return sortOrder;
-    }
+    O transform(I input);
 
 }

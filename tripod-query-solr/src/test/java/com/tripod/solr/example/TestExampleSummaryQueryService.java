@@ -16,7 +16,7 @@
  */
 package com.tripod.solr.example;
 
-import com.tripod.api.query.Field;
+import com.tripod.api.Field;
 import com.tripod.api.query.Query;
 import com.tripod.api.query.Sort;
 import com.tripod.api.query.SortOrder;

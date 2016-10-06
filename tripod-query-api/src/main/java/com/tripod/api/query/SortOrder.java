@@ -17,6 +17,8 @@
 package com.tripod.api.query;
 
 /**
+ * Sort orders.
+ *
  * @author bbende
  */
 public enum SortOrder {

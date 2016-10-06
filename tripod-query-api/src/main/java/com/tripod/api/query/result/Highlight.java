@@ -21,6 +21,8 @@ import org.apache.commons.lang.Validate;
 import java.util.List;
 
 /**
+ * The highlighting results for a given field.
+ *
  * @author bbende
  */
 public class Highlight {

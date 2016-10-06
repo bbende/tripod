@@ -14,9 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query;
+package com.tripod.api;
 
 /**
+ * A field in the index to search on.
+ *
+ * Implementors should typically create an enum that implements Field.
+ *
  * @author bbende
  */
 public interface Field {

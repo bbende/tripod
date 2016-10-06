@@ -16,6 +16,7 @@
  */
 package com.tripod.api.query;
 
+import com.tripod.api.Field;
 import org.apache.commons.lang.Validate;
 
 import java.util.HashMap;

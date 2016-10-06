@@ -19,6 +19,8 @@ package com.tripod.api.query.result;
 import org.apache.commons.lang.Validate;
 
 /**
+ * The count of one value when faceting on a given field.
+ *
  * @author bbende
  */
 public class FacetCount {

@@ -16,7 +16,7 @@
  */
 package com.tripod.solr.service;
 
-import com.tripod.api.query.Transformer;
+import com.tripod.api.Transformer;
 import com.tripod.api.query.result.QueryResult;
 import org.apache.solr.common.SolrDocument;
 

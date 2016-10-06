@@ -12,7 +12,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-
 # Tripod [![Build Status](https://travis-ci.org/bbende/tripod.svg?branch=master)](https://travis-ci.org/bbende/tripod)
 
 A library for bootstrapping the development of search applications.
@@ -27,7 +26,18 @@ Creates an abstraction layer between the application and the underlying search p
 
 # How can I use this in my application?
 
-1) Add a Maven dependency on tripod-query-solr:
+1) Add the bintray repository and a Maven dependency on tripod-query-solr:
+  
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>bintray-bbende-maven-repo</id>
+            <name>bintray</name>
+            <url>http://dl.bintray.com/bbende/maven-repo</url>
+        </repository>
+    </repositories>
 
     <dependency>
       <groupId>com.tripod</groupId>
@@ -101,3 +111,11 @@ Creates an abstraction layer between the application and the underlying search p
     
     
 For additional information see the example in [tripod-query-solr/src/test/java](https://github.com/bbende/tripod/tree/master/tripod-query-solr/src/test/java/com/tripod/solr/example).
+
+# Release Instructions
+
+    mvn release:prepare -DdryRun=true -Pfull
+    mvn release:clean
+    mvn release:prepare -Pfull
+    mvn release:perform -Pfull
+    git push --all && git push --tags

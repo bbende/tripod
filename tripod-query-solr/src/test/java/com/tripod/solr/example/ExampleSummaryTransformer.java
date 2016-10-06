@@ -32,10 +32,12 @@ public class ExampleSummaryTransformer implements SolrDocumentTransformer<Exampl
     public ExampleSummary transform(SolrDocument input) {
         String id = getString(input, ExampleField.ID.getName());
         String title = getString(input, ExampleField.TITLE.getName());
+        String color = getString(input, ExampleField.COLOR.getName());
         Date createDate = getDate(input, ExampleField.CREATE_DATE.getName());
 
         ExampleSummary result = new ExampleSummary(id);
         result.setTitle(title);
+        result.setColor(color);
         result.setCreateDate(createDate);
         return result;
     }

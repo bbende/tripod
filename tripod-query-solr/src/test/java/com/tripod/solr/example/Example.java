@@ -29,6 +29,7 @@ public class Example extends QueryResult<String> {
 
     private String title;
     private String body;
+    private String color;
     private Date createDate;
 
     public Example(String s) {
@@ -49,6 +50,14 @@ public class Example extends QueryResult<String> {
 
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 
     public Date getCreateDate() {

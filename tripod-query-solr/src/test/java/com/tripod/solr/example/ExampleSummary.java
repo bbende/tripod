@@ -30,6 +30,7 @@ import java.util.Date;
 public class ExampleSummary extends QueryResult<String> {
 
     private String title;
+    private String color;
     private Date createDate;
 
     public ExampleSummary(String s) {
@@ -42,6 +43,14 @@ public class ExampleSummary extends QueryResult<String> {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 
     public Date getCreateDate() {

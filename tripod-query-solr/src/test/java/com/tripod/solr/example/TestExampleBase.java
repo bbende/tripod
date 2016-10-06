@@ -50,31 +50,36 @@ public abstract class TestExampleBase {
             SolrInputDocument doc1 = new SolrInputDocument();
             doc1.addField(ExampleField.ID.getName(), "1");
             doc1.addField(ExampleField.TITLE.getName(), "Title 1");
-            doc1.addField(ExampleField.BODY.getName(), "Body 1");
+            doc1.addField(ExampleField.BODY.getName(), "Body 1 Solr is cool");
+            doc1.addField(ExampleField.COLOR.getName(), "BLUE");
             doc1.addField(ExampleField.CREATE_DATE.getName(), dateFormat.parse("2016-10-01T01:00:00Z"));
 
             SolrInputDocument doc2 = new SolrInputDocument();
             doc2.addField(ExampleField.ID.getName(), "2");
             doc2.addField(ExampleField.TITLE.getName(), "Title 2");
-            doc2.addField(ExampleField.BODY.getName(), "Body 2");
+            doc2.addField(ExampleField.BODY.getName(), "Body 2 Lucene is cool");
+            doc2.addField(ExampleField.COLOR.getName(), "RED");
             doc2.addField(ExampleField.CREATE_DATE.getName(), dateFormat.parse("2016-10-01T02:00:00Z"));
 
             SolrInputDocument doc3 = new SolrInputDocument();
             doc3.addField(ExampleField.ID.getName(), "3");
             doc3.addField(ExampleField.TITLE.getName(), "Title 3");
             doc3.addField(ExampleField.BODY.getName(), "Body 3");
+            doc3.addField(ExampleField.COLOR.getName(), "GREEN");
             doc3.addField(ExampleField.CREATE_DATE.getName(), dateFormat.parse("2016-10-01T03:00:00Z"));
 
             SolrInputDocument doc4 = new SolrInputDocument();
             doc4.addField(ExampleField.ID.getName(), "4");
             doc4.addField(ExampleField.TITLE.getName(), "Title 4");
             doc4.addField(ExampleField.BODY.getName(), "Body 4");
+            doc4.addField(ExampleField.COLOR.getName(), "BLUE");
             doc4.addField(ExampleField.CREATE_DATE.getName(), dateFormat.parse("2016-10-01T04:00:00Z"));
 
             SolrInputDocument doc5 = new SolrInputDocument();
             doc5.addField(ExampleField.ID.getName(), "5");
             doc5.addField(ExampleField.TITLE.getName(), "Title 5");
             doc5.addField(ExampleField.BODY.getName(), "Body 5");
+            doc5.addField(ExampleField.COLOR.getName(), "RED");
             doc5.addField(ExampleField.CREATE_DATE.getName(), dateFormat.parse("2016-10-01T05:00:00Z"));
 
             // add the test data to the index

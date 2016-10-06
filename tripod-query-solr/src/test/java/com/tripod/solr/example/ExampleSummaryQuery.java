@@ -41,6 +41,7 @@ public class ExampleSummaryQuery extends Query {
         setReturnFields(Arrays.asList(
                 ExampleField.ID,
                 ExampleField.TITLE,
+                ExampleField.COLOR,
                 ExampleField.CREATE_DATE
         ));
     }

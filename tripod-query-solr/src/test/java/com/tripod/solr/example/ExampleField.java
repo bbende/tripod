@@ -28,6 +28,7 @@ public enum ExampleField implements Field {
     ID("id"),
     TITLE("title"),
     BODY("body"),
+    COLOR("color"),
     CREATE_DATE("create_date");
 
     private String fieldName;

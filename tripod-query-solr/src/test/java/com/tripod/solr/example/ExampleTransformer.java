@@ -33,12 +33,14 @@ public class ExampleTransformer implements SolrDocumentTransformer<Example> {
         String id = getString(input, ExampleField.ID.getName());
         String title = getString(input, ExampleField.TITLE.getName());
         String body = getString(input, ExampleField.BODY.getName());
+        String color = getString(input, ExampleField.COLOR.getName());
         Date createDate = getDate(input, ExampleField.CREATE_DATE.getName());
 
         Example result = new Example(id);
         result.setTitle(title);
-        result.setCreateDate(createDate);
         result.setBody(body);
+        result.setColor(color);
+        result.setCreateDate(createDate);
         return result;
     }
 

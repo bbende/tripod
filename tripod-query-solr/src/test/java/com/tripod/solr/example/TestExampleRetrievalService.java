@@ -47,7 +47,8 @@ public class TestExampleRetrievalService extends TestExampleBase {
         Assert.assertNotNull(result);
         Assert.assertEquals("1", result.getId());
         Assert.assertEquals("Title 1", result.getTitle());
-        Assert.assertEquals("Body 1", result.getBody());
+        Assert.assertNotNull(result.getBody());
+        Assert.assertTrue(result.getBody().startsWith("Body 1"));
         Assert.assertEquals(new SimpleDateFormat(DATE_FORMAT).parse("2016-10-01T01:00:00Z"), result.getCreateDate());
     }
 

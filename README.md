@@ -12,6 +12,9 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+
+[![Build Status](https://travis-ci.org/bbende/tripod.svg?branch=master)](https://travis-ci.org/bbende/tripod)
+
 # Tripod
 
 A library for bootstrapping the development of search applications.

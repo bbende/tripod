@@ -16,6 +16,7 @@
  */
 package com.tripod.solr.query;
 
+import com.tripod.api.Field;
 import com.tripod.api.query.Query;
 import com.tripod.api.query.Sort;
 import com.tripod.api.query.SortOrder;
@@ -26,10 +27,10 @@ import org.apache.solr.client.solrj.SolrQuery;
  *
  * @author bbende
  */
-public class StandardSolrQueryFactory<Q extends Query> implements SolrQueryFactory<Q> {
+public class StandardSolrQueryTransformer<Q extends Query<Field>> implements SolrQueryTransformer<Q> {
 
     @Override
-    public SolrQuery create(final Q query) {
+    public SolrQuery transform(final Q query) {
         final SolrQuery solrQuery = new SolrQuery(query.getQuery());
         solrQuery.setStart(query.getOffset());
         solrQuery.setRows(query.getRows());

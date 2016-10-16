@@ -17,7 +17,7 @@
 package com.tripod.solr.example;
 
 import com.tripod.api.query.RetrievalQuery;
-import com.tripod.solr.query.StandardSolrQueryFactory;
+import com.tripod.solr.query.StandardSolrQueryTransformer;
 import com.tripod.solr.service.SolrRetrievalService;
 import org.apache.solr.client.solrj.SolrClient;
 
@@ -29,6 +29,6 @@ import org.apache.solr.client.solrj.SolrClient;
 public class ExampleRetrievalService extends SolrRetrievalService<RetrievalQuery,Example> {
 
     public ExampleRetrievalService(SolrClient solrClient) {
-        super(solrClient, new StandardSolrQueryFactory<>(), new ExampleTransformer());
+        super(solrClient, new StandardSolrQueryTransformer<>(), new ExampleTransformer());
     }
 }

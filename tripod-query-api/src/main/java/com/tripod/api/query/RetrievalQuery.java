@@ -16,12 +16,14 @@
  */
 package com.tripod.api.query;
 
+import com.tripod.api.Field;
+
 /**
  * A query that returns only one result.
  *
  * @author bbende
  */
-public class RetrievalQuery extends Query {
+public class RetrievalQuery<F extends Field> extends Query<F> {
 
     /**
      * Forces the offset to 0 and rows to 1.

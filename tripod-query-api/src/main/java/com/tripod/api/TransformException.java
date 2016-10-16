@@ -14,42 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query;
-
-import com.tripod.api.Field;
-import org.apache.commons.lang.Validate;
+package com.tripod.api;
 
 /**
- * A sort clause for a query.
+ * Exception during a transform.
  *
  * @author bbende
  */
-public class Sort<F extends Field> {
+public class TransformException extends Exception {
 
-    private final F field;
-
-    private final SortOrder sortOrder;
-
-    public Sort(F field, SortOrder sortOrder) {
-        this.field = field;
-        this.sortOrder = sortOrder;
-        Validate.notNull(this.field);
-        Validate.notNull(this.sortOrder);
+    public TransformException(String message) {
+        super(message);
     }
 
-    public F getField() {
-        return field;
+    public TransformException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public SortOrder getSortOrder() {
-        return sortOrder;
-    }
-
-    public static Sort asc(Field field) {
-        return new Sort(field, SortOrder.ASC);
-    }
-
-    public static Sort desc(Field field) {
-        return new Sort(field, SortOrder.DESC);
-    }
 }

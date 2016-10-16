@@ -16,7 +16,7 @@
  */
 package com.tripod.api.query.service;
 
-import com.tripod.api.query.RetrievalQuery;
+import com.tripod.api.query.Query;
 import com.tripod.api.query.result.QueryResult;
 
 /**
@@ -24,7 +24,7 @@ import com.tripod.api.query.result.QueryResult;
  *
  * @author bbende
  */
-public interface RetrievalService<Q extends RetrievalQuery, QR extends QueryResult> {
+public interface RetrievalService<Q extends Query, QR extends QueryResult> {
 
     /**
      * Performs a query that is expected to return a single result.

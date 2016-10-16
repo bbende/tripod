@@ -14,42 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query;
+package com.tripod.lucene;
 
 import com.tripod.api.Field;
-import org.apache.commons.lang.Validate;
+import org.apache.lucene.search.SortField;
 
 /**
- * A sort clause for a query.
+ * Extension of Field for Lucene specific functionality.
  *
  * @author bbende
  */
-public class Sort<F extends Field> {
+public interface LuceneField extends Field {
 
-    private final F field;
+    /**
+     * All fields for LuceneField type.
+     */
+    LuceneField ALL_LUCENE_FIELDS = new LuceneField() {
+        @Override
+        public SortField.Type getSortType() {
+            return null;
+        }
 
-    private final SortOrder sortOrder;
+        @Override
+        public String getName() {
+            return "*";
+        }
+    };
 
-    public Sort(F field, SortOrder sortOrder) {
-        this.field = field;
-        this.sortOrder = sortOrder;
-        Validate.notNull(this.field);
-        Validate.notNull(this.sortOrder);
-    }
+    SortField.Type getSortType();
 
-    public F getField() {
-        return field;
-    }
-
-    public SortOrder getSortOrder() {
-        return sortOrder;
-    }
-
-    public static Sort asc(Field field) {
-        return new Sort(field, SortOrder.ASC);
-    }
-
-    public static Sort desc(Field field) {
-        return new Sort(field, SortOrder.DESC);
-    }
 }

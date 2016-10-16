@@ -14,42 +14,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query;
+package com.tripod.lucene.example;
 
-import com.tripod.api.Field;
-import org.apache.commons.lang.Validate;
+import com.tripod.api.query.result.QueryResult;
+
+import java.util.Date;
 
 /**
- * A sort clause for a query.
+ * Example QueryResult implementation for search result summary.
+ *
+ * This class would act as the "search result".
  *
  * @author bbende
  */
-public class Sort<F extends Field> {
+public class ExampleSummary extends QueryResult<String> {
 
-    private final F field;
+    private String title;
+    private String color;
+    private Date createDate;
 
-    private final SortOrder sortOrder;
-
-    public Sort(F field, SortOrder sortOrder) {
-        this.field = field;
-        this.sortOrder = sortOrder;
-        Validate.notNull(this.field);
-        Validate.notNull(this.sortOrder);
+    public ExampleSummary(String s) {
+        super(s);
     }
 
-    public F getField() {
-        return field;
+    public String getTitle() {
+        return title;
     }
 
-    public SortOrder getSortOrder() {
-        return sortOrder;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public static Sort asc(Field field) {
-        return new Sort(field, SortOrder.ASC);
+    public String getColor() {
+        return color;
     }
 
-    public static Sort desc(Field field) {
-        return new Sort(field, SortOrder.DESC);
+    public void setColor(String color) {
+        this.color = color;
     }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
+
 }

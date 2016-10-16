@@ -14,32 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.solr.service;
+package com.tripod.lucene.service;
 
-import com.tripod.api.query.Query;
 import com.tripod.api.query.result.QueryResult;
-import com.tripod.api.query.result.QueryResults;
 import com.tripod.api.query.service.QueryException;
 import com.tripod.api.query.service.QueryService;
-import com.tripod.solr.query.SolrQueryTransformer;
-import org.apache.solr.client.solrj.SolrClient;
+import com.tripod.lucene.query.LuceneQuery;
+import com.tripod.lucene.query.LuceneQueryResults;
+import com.tripod.lucene.query.LuceneQueryTransformer;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.search.SearcherManager;
 
 /**
- * Solr implementation of QueryService.
+ * Lucene implementation of QueryService.
+ *
+ * NOTE: Clients should use SearcherManagerRefresher in order to periodically open new searchers and see new data.
  *
  * @author bbende
  */
-public class SolrQueryService<Q extends Query, QR extends QueryResult> extends AbstractSolrService<Q,QR>
+public class LuceneQueryService<Q extends LuceneQuery, QR extends QueryResult> extends AbstractLuceneService<Q,QR>
         implements QueryService<Q,QR> {
 
-    public SolrQueryService(final SolrClient solrClient,
-                            final SolrQueryTransformer<Q> queryFactory,
-                            final SolrDocumentTransformer<QR> solrDocumentTransformer) {
-        super(solrClient, queryFactory, solrDocumentTransformer);
+    public LuceneQueryService(final SearcherManager searcherManager,
+                              final Analyzer analyzer,
+                              final LuceneQueryTransformer<Q> queryTransformer,
+                              final LuceneDocumentTransformer<QR> documentTransformer) {
+        super(searcherManager, analyzer, queryTransformer, documentTransformer);
     }
 
     @Override
-    public QueryResults<QR> search(Q query) throws QueryException {
+    public LuceneQueryResults<QR> search(Q query) throws QueryException {
         return performSearch(query);
     }
 

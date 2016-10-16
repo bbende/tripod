@@ -14,42 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query;
+package com.tripod.solr.query;
 
-import com.tripod.api.Field;
-import org.apache.commons.lang.Validate;
+import com.tripod.api.query.Query;
+import com.tripod.api.query.QueryTransformer;
+import org.apache.solr.client.solrj.SolrQuery;
 
 /**
- * A sort clause for a query.
+ * Produces SolrQuery instances from the provided Query.
  *
  * @author bbende
  */
-public class Sort<F extends Field> {
+public interface SolrQueryTransformer<Q extends Query> extends QueryTransformer<Q,SolrQuery> {
 
-    private final F field;
-
-    private final SortOrder sortOrder;
-
-    public Sort(F field, SortOrder sortOrder) {
-        this.field = field;
-        this.sortOrder = sortOrder;
-        Validate.notNull(this.field);
-        Validate.notNull(this.sortOrder);
-    }
-
-    public F getField() {
-        return field;
-    }
-
-    public SortOrder getSortOrder() {
-        return sortOrder;
-    }
-
-    public static Sort asc(Field field) {
-        return new Sort(field, SortOrder.ASC);
-    }
-
-    public static Sort desc(Field field) {
-        return new Sort(field, SortOrder.DESC);
-    }
 }

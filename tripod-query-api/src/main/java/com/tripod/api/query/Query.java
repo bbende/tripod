@@ -28,7 +28,7 @@ import java.util.Map;
  *
  * @author bbende
  */
-public class Query {
+public class Query<F extends Field> {
 
     public static final String QUERY_ALL = "*:*";
 
@@ -39,12 +39,12 @@ public class Query {
     private final Integer offset;
     private final Integer rows;
 
-    private List<Field> returnFields;
-    private List<Field> highlightFields;
-    private List<Field> facetFields;
+    private List<F> returnFields;
+    private List<F> highlightFields;
+    private List<F> facetFields;
 
     private List<String> filterQueries;
-    private List<Sort> sorts;
+    private List<Sort<F>> sorts;
 
     private Map<String,String> params = new HashMap<>();
 
@@ -79,27 +79,27 @@ public class Query {
         return rows;
     }
 
-    public List<Field> getReturnFields() {
+    public List<F> getReturnFields() {
         return returnFields;
     }
 
-    public void setReturnFields(List<Field> returnFields) {
+    public void setReturnFields(List<F> returnFields) {
         this.returnFields = returnFields;
     }
 
-    public List<Field> getHighlightFields() {
+    public List<F> getHighlightFields() {
         return highlightFields;
     }
 
-    public void setHighlightFields(List<Field> highlightFields) {
+    public void setHighlightFields(List<F> highlightFields) {
         this.highlightFields = highlightFields;
     }
 
-    public List<Field> getFacetFields() {
+    public List<F> getFacetFields() {
         return facetFields;
     }
 
-    public void setFacetFields(List<Field> facetFields) {
+    public void setFacetFields(List<F> facetFields) {
         this.facetFields = facetFields;
     }
 
@@ -111,11 +111,11 @@ public class Query {
         this.filterQueries = filterQueries;
     }
 
-    public List<Sort> getSorts() {
+    public List<Sort<F>> getSorts() {
         return sorts;
     }
 
-    public void setSorts(List<Sort> sorts) {
+    public void setSorts(List<Sort<F>> sorts) {
         this.sorts = sorts;
     }
 

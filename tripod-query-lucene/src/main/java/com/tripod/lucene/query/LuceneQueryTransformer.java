@@ -14,18 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.solr.query;
+package com.tripod.lucene.query;
 
 import com.tripod.api.query.Query;
-import org.apache.solr.client.solrj.SolrQuery;
+import com.tripod.api.query.QueryTransformer;
+import com.tripod.lucene.LuceneField;
 
 /**
- * Produces SolrQuery instances from the provided Query.
+ * Produces Lucene Query instances from the provided Tripod Query.
  *
  * @author bbende
  */
-public interface SolrQueryFactory<Q extends Query> {
-
-    SolrQuery create(Q query);
+public interface LuceneQueryTransformer<Q extends Query<LuceneField>>
+        extends QueryTransformer<Q, org.apache.lucene.search.Query> {
 
 }

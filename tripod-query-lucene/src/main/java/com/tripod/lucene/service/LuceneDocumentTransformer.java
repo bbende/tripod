@@ -14,42 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query;
+package com.tripod.lucene.service;
 
-import com.tripod.api.Field;
-import org.apache.commons.lang.Validate;
+import com.tripod.api.Transformer;
+import com.tripod.api.query.result.QueryResult;
+import org.apache.lucene.document.Document;
 
 /**
- * A sort clause for a query.
+ * Transforms a Lucene Document to the given type of QueryResult.
  *
  * @author bbende
  */
-public class Sort<F extends Field> {
+public interface LuceneDocumentTransformer<QR extends QueryResult> extends Transformer<Document,QR> {
 
-    private final F field;
-
-    private final SortOrder sortOrder;
-
-    public Sort(F field, SortOrder sortOrder) {
-        this.field = field;
-        this.sortOrder = sortOrder;
-        Validate.notNull(this.field);
-        Validate.notNull(this.sortOrder);
-    }
-
-    public F getField() {
-        return field;
-    }
-
-    public SortOrder getSortOrder() {
-        return sortOrder;
-    }
-
-    public static Sort asc(Field field) {
-        return new Sort(field, SortOrder.ASC);
-    }
-
-    public static Sort desc(Field field) {
-        return new Sort(field, SortOrder.DESC);
-    }
 }

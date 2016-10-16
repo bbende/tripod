@@ -14,42 +14,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query;
+package com.tripod.lucene.example;
 
-import com.tripod.api.Field;
-import org.apache.commons.lang.Validate;
+import com.tripod.lucene.LuceneField;
+import org.apache.lucene.search.SortField;
 
 /**
- * A sort clause for a query.
+ * Example field implementation.
  *
  * @author bbende
  */
-public class Sort<F extends Field> {
+public enum ExampleField implements LuceneField {
 
-    private final F field;
+    ID("id", SortField.Type.STRING),
+    TITLE("title", SortField.Type.STRING),
+    BODY("body", SortField.Type.STRING),
+    COLOR("color", SortField.Type.STRING),
+    CREATE_DATE("create_date", SortField.Type.LONG);
 
-    private final SortOrder sortOrder;
+    private String fieldName;
+    private SortField.Type sortType;
 
-    public Sort(F field, SortOrder sortOrder) {
-        this.field = field;
-        this.sortOrder = sortOrder;
-        Validate.notNull(this.field);
-        Validate.notNull(this.sortOrder);
+    ExampleField(String fieldName, SortField.Type sortType) {
+        this.fieldName = fieldName;
+        this.sortType = sortType;
     }
 
-    public F getField() {
-        return field;
+    @Override
+    public String getName() {
+        return fieldName;
     }
 
-    public SortOrder getSortOrder() {
-        return sortOrder;
+    @Override
+    public SortField.Type getSortType() {
+        return sortType;
     }
 
-    public static Sort asc(Field field) {
-        return new Sort(field, SortOrder.ASC);
-    }
-
-    public static Sort desc(Field field) {
-        return new Sort(field, SortOrder.DESC);
-    }
 }

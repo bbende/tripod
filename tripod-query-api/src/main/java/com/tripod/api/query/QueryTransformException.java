@@ -16,40 +16,21 @@
  */
 package com.tripod.api.query;
 
-import com.tripod.api.Field;
-import org.apache.commons.lang.Validate;
+import com.tripod.api.TransformException;
 
 /**
- * A sort clause for a query.
+ * Exception during query transforms.
  *
  * @author bbende
  */
-public class Sort<F extends Field> {
+public class QueryTransformException extends TransformException {
 
-    private final F field;
-
-    private final SortOrder sortOrder;
-
-    public Sort(F field, SortOrder sortOrder) {
-        this.field = field;
-        this.sortOrder = sortOrder;
-        Validate.notNull(this.field);
-        Validate.notNull(this.sortOrder);
+    public QueryTransformException(String message) {
+        super(message);
     }
 
-    public F getField() {
-        return field;
+    public QueryTransformException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    public SortOrder getSortOrder() {
-        return sortOrder;
-    }
-
-    public static Sort asc(Field field) {
-        return new Sort(field, SortOrder.ASC);
-    }
-
-    public static Sort desc(Field field) {
-        return new Sort(field, SortOrder.DESC);
-    }
 }

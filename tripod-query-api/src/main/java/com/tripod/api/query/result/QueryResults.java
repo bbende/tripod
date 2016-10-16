@@ -34,7 +34,7 @@ public class QueryResults<QR extends QueryResult> {
     private final List<QR> results;
     private final List<FacetResult> facetResults;
 
-    private QueryResults(Builder<QR> builder) {
+    protected QueryResults(Builder<QR> builder) {
         this.offset = builder.offset;
         this.pageSize = builder.pageSize;
         this.totalResults = builder.totalResults;

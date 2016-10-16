@@ -16,40 +16,15 @@
  */
 package com.tripod.api.query;
 
-import com.tripod.api.Field;
-import org.apache.commons.lang.Validate;
+import com.tripod.api.Transformer;
 
 /**
- * A sort clause for a query.
+ * Transformer that converts Query instances to another type.
  *
  * @author bbende
+ * @param <I> The type of query that will be transformed
+ * @param <O> The type of query that will be returned
  */
-public class Sort<F extends Field> {
+public interface QueryTransformer<I extends Query, O> extends Transformer<I,O> {
 
-    private final F field;
-
-    private final SortOrder sortOrder;
-
-    public Sort(F field, SortOrder sortOrder) {
-        this.field = field;
-        this.sortOrder = sortOrder;
-        Validate.notNull(this.field);
-        Validate.notNull(this.sortOrder);
-    }
-
-    public F getField() {
-        return field;
-    }
-
-    public SortOrder getSortOrder() {
-        return sortOrder;
-    }
-
-    public static Sort asc(Field field) {
-        return new Sort(field, SortOrder.ASC);
-    }
-
-    public static Sort desc(Field field) {
-        return new Sort(field, SortOrder.DESC);
-    }
 }

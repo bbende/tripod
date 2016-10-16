@@ -16,6 +16,7 @@
  */
 package com.tripod.solr.example;
 
+import com.tripod.api.Field;
 import com.tripod.api.query.Query;
 
 import java.util.Arrays;
@@ -25,7 +26,7 @@ import java.util.Arrays;
  *
  * @author bbende
  */
-public class ExampleSummaryQuery extends Query {
+public class ExampleSummaryQuery extends Query<Field> {
 
     public ExampleSummaryQuery(String query) {
         super(query);

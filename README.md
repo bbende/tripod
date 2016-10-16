@@ -24,10 +24,10 @@ Creates an abstraction layer between the application and the underlying search p
 
 **tripod-query-solr** provides a Solr based implementation of the API.
 
-# How can I use this in my application?
+**tripod-query-lucene** provides a Lucene based implementation of the API.
 
-1) Add the bintray repository and a Maven dependency on tripod-query-solr:
-  
+# Maven Repository for Released Artifacts
+
     <repositories>
         <repository>
             <snapshots>
@@ -39,6 +39,10 @@ Creates an abstraction layer between the application and the underlying search p
         </repository>
     </repositories>
 
+# How can I use this in my application with Solr?
+
+1) Add a Maven dependency on tripod-query-solr:
+  
     <dependency>
       <groupId>com.tripod</groupId>
       <artifactId>tripod-query-solr</artifactId>
@@ -111,6 +115,94 @@ Creates an abstraction layer between the application and the underlying search p
     
     
 For additional information see the example in [tripod-query-solr/src/test/java](https://github.com/bbende/tripod/tree/master/tripod-query-solr/src/test/java/com/tripod/solr/example).
+
+# How can I use this in my application with Lucene?
+
+NOTE: Lucene support is not part of the Tripod 0.1.0 release.
+
+1) Add a Maven dependency on tripod-query-lucene:
+
+    <dependency>
+      <groupId>com.tripod</groupId>
+      <artifactId>tripod-query-lucene</artifactId>
+      <version>${tripod.version}</version>
+    </dependency>
+    
+2) Create an enumeration that defines the available fields and implements the Field interface:
+
+    public enum FooField implements LuceneField {
+        ID("id", SortField.Type.STRING),
+        TITLE("title", SortField.Type.STRING),
+            
+        private String fieldName;
+        private SortField.Type sortType;
+    
+        ExampleField(String fieldName, SortField.Type sortType) {
+            this.fieldName = fieldName;
+            this.sortType = sortType;
+        }
+        @Override
+        public String getName() {
+            return fieldName;
+        }
+        @Override
+        public SortField.Type getSortType() {
+            return sortType;
+        }
+    }
+    
+3) Create a domain object that extends QueryResult:
+
+    public class Foo extends QueryResult<String> {
+
+        private String title;
+
+        public Foo(String s) {
+            super(s);
+        }
+        public String getTitle() {
+            return title;
+        }
+        public void setTitle(String title) {
+            this.title = title;
+        }
+    }
+    
+4) Create a transformer that takes a Lucene Document and produces the domain object above:
+
+    public class FooTransformer implements LuceneDocumentTransformer<Foo> {
+        @Override
+        public Foo transform(Document input) {
+            String id = input.get(ExampleField.ID.getName());
+            String title = input.get(ExampleField.TITLE.getName());
+            
+            Foo foo = new Foo(id);
+            foo.setTitle(title);
+            return foo;
+        }
+    }
+    
+5) Create a query service that extends LuceneQueryService and uses the transformer above:
+
+    public FooQueryService(final SearcherManager searcherManager, final String defaultField, final Analyzer analyzer) {
+            super(searcherManager, analyzer,
+                    new StandardLuceneQueryTransformer<>(defaultField, analyzer),
+                    new FooTransformer());
+        }
+
+6) Initialize the query service with the appropriate SeacherManager, Analyzer, and default field, and perform queries:
+
+    String defaultField = ...
+    Analyzer analyzer = ...
+    SearcherManager searcherManager =...
+    
+    LuceneQueryService<LuceneQuery,Foo> queryService = new FooQueryService(searcherManager, defaultField, analyzer);
+    
+    LuceneQuery query = new LuceneQuery("id:1");
+    LuceneQueryResults<Foo> results = queryService.search(query);
+    
+    
+For additional information see the example in [tripod-query-lucene/src/test/java](https://github.com/bbende/tripod/tree/master/tripod-query-lucene/src/test/java/com/tripod/lucene/example).
 
 # Release Instructions
 

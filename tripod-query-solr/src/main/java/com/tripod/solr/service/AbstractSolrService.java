@@ -16,6 +16,7 @@
  */
 package com.tripod.solr.service;
 
+import com.tripod.api.TransformException;
 import com.tripod.api.query.Query;
 import com.tripod.api.query.result.FacetCount;
 import com.tripod.api.query.result.FacetResult;
@@ -23,7 +24,7 @@ import com.tripod.api.query.result.Highlight;
 import com.tripod.api.query.result.QueryResult;
 import com.tripod.api.query.result.QueryResults;
 import com.tripod.api.query.service.QueryException;
-import com.tripod.solr.query.SolrQueryFactory;
+import com.tripod.solr.query.SolrQueryTransformer;
 import org.apache.commons.lang.Validate;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -46,17 +47,17 @@ import java.util.Map;
  *
  * @author bbende
  */
-public class AbstractSolrService <Q extends Query, QR extends QueryResult> {
+public class AbstractSolrService<Q extends Query, QR extends QueryResult> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SolrQueryService.class);
 
     protected final SolrClient solrClient;
-    protected final SolrQueryFactory<Q> queryFactory;
+    protected final SolrQueryTransformer<Q> queryFactory;
     protected final SolrDocumentTransformer<QR> solrDocumentTransformer;
     protected SolrRequest.METHOD defaultMethod = SolrRequest.METHOD.GET;
 
     public AbstractSolrService(final SolrClient solrClient,
-                               final SolrQueryFactory<Q> queryFactory,
+                               final SolrQueryTransformer<Q> queryFactory,
                                final SolrDocumentTransformer<QR> solrDocumentTransformer) {
         this.solrClient = solrClient;
         this.queryFactory = queryFactory;
@@ -79,16 +80,16 @@ public class AbstractSolrService <Q extends Query, QR extends QueryResult> {
      * @throws QueryException if an error ocurred performing the search
      */
     protected QueryResults<QR> performSearch(Q query) throws QueryException {
-        // Convert from Query API to SolrQuery
-        final SolrQuery solrQuery = queryFactory.create(query);
-        final SolrRequest.METHOD method = getMethod(query);
-
-        // Start the results builder with the offset and rows from the query
-        final QueryResults.Builder<QR> resultsBuilder = new QueryResults.Builder<QR>()
-                .offset(query.getOffset())
-                .pageSize(query.getRows());
-
         try {
+            // Convert from Query API to SolrQuery
+            final SolrQuery solrQuery = queryFactory.transform(query);
+            final SolrRequest.METHOD method = getMethod(query);
+
+            // Start the results builder with the offset and rows from the query
+            final QueryResults.Builder<QR> resultsBuilder = new QueryResults.Builder<QR>()
+                    .offset(query.getOffset())
+                    .pageSize(query.getRows());
+
             // Perform the actual Solr query
             long startTime = System.currentTimeMillis();
             final QueryResponse response = solrClient.query(solrQuery, method);
@@ -111,6 +112,7 @@ public class AbstractSolrService <Q extends Query, QR extends QueryResult> {
             processFacetResults(resultsBuilder, facetFields);
 
             resultsBuilder.totalResults(solrDocs.getNumFound());
+            return resultsBuilder.build();
 
         } catch (SolrServerException e) {
             LOGGER.error(e.getMessage(), e);
@@ -118,9 +120,9 @@ public class AbstractSolrService <Q extends Query, QR extends QueryResult> {
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
             throw new QueryException("An unexpected error occurred communicating with the query service", e);
+        } catch (TransformException e) {
+            throw new QueryException("A transform error occurred", e);
         }
-
-        return resultsBuilder.build();
     }
 
     /**

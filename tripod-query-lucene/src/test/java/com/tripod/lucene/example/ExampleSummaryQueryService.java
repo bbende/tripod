@@ -14,42 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query;
+package com.tripod.lucene.example;
 
-import com.tripod.api.Field;
-import org.apache.commons.lang.Validate;
+import com.tripod.lucene.query.LuceneQuery;
+import com.tripod.lucene.query.StandardLuceneQueryTransformer;
+import com.tripod.lucene.service.LuceneQueryService;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.search.SearcherManager;
 
 /**
- * A sort clause for a query.
+ * LuceneQueryService implementation for ExampleSummary.
  *
  * @author bbende
  */
-public class Sort<F extends Field> {
+public class ExampleSummaryQueryService extends LuceneQueryService<LuceneQuery,ExampleSummary> {
 
-    private final F field;
-
-    private final SortOrder sortOrder;
-
-    public Sort(F field, SortOrder sortOrder) {
-        this.field = field;
-        this.sortOrder = sortOrder;
-        Validate.notNull(this.field);
-        Validate.notNull(this.sortOrder);
+    public ExampleSummaryQueryService(final SearcherManager searcherManager,
+                                      final String defaultField,
+                                      final Analyzer analyzer) {
+        super(searcherManager, analyzer,
+                new StandardLuceneQueryTransformer<>(defaultField, analyzer),
+                new ExampleSummaryTransformer());
     }
 
-    public F getField() {
-        return field;
-    }
-
-    public SortOrder getSortOrder() {
-        return sortOrder;
-    }
-
-    public static Sort asc(Field field) {
-        return new Sort(field, SortOrder.ASC);
-    }
-
-    public static Sort desc(Field field) {
-        return new Sort(field, SortOrder.DESC);
-    }
 }

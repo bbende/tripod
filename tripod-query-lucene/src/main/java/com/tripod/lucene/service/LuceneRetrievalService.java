@@ -14,28 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.solr.service;
+package com.tripod.lucene.service;
 
-import com.tripod.api.query.RetrievalQuery;
 import com.tripod.api.query.result.QueryResult;
 import com.tripod.api.query.result.QueryResults;
 import com.tripod.api.query.service.QueryException;
 import com.tripod.api.query.service.RetrievalService;
-import com.tripod.solr.query.SolrQueryTransformer;
-import org.apache.solr.client.solrj.SolrClient;
+import com.tripod.lucene.query.LuceneQueryTransformer;
+import com.tripod.lucene.query.LuceneRetrievalQuery;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.search.SearcherManager;
 
 /**
- * Solr implementation of RetrievalService.
+ * A RetrievalService for Lucene.
  *
  * @author bbende
  */
-public class SolrRetrievalService<Q extends RetrievalQuery, QR extends QueryResult> extends AbstractSolrService<Q,QR>
-    implements RetrievalService<Q,QR> {
+public class LuceneRetrievalService<Q extends LuceneRetrievalQuery, QR extends QueryResult> extends AbstractLuceneService<Q,QR>
+        implements RetrievalService<Q,QR> {
 
-    public SolrRetrievalService(final SolrClient solrClient,
-                                final SolrQueryTransformer<Q> queryFactory,
-                                final SolrDocumentTransformer<QR> solrDocumentTransformer) {
-        super(solrClient, queryFactory, solrDocumentTransformer);
+    public LuceneRetrievalService(final SearcherManager searcherManager,
+                                  final Analyzer analyzer,
+                                  final LuceneQueryTransformer<Q> queryTransformer,
+                                  final LuceneDocumentTransformer<QR> documentTransformer) {
+        super(searcherManager, analyzer, queryTransformer, documentTransformer);
     }
 
     @Override
@@ -51,5 +53,4 @@ public class SolrRetrievalService<Q extends RetrievalQuery, QR extends QueryResu
             return results.getResults().get(0);
         }
     }
-
 }

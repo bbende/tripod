@@ -16,7 +16,7 @@
  limitations under the License.
 -->
 <config>
-  <luceneMatchVersion>6.2.1</luceneMatchVersion>
+  <luceneMatchVersion>6.6.0</luceneMatchVersion>
 
   <dataDir>${solr.data.dir:}</dataDir>
 

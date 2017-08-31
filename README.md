@@ -43,75 +43,75 @@ Creates an abstraction layer between the application and the underlying search p
 
 1) Add a Maven dependency on tripod-query-solr:
   
-    <dependency>
-      <groupId>com.tripod</groupId>
-      <artifactId>tripod-query-solr</artifactId>
-      <version>${tripod.version}</version>
-    </dependency>
+        <dependency>
+          <groupId>com.tripod</groupId>
+          <artifactId>tripod-query-solr</artifactId>
+          <version>${tripod.version}</version>
+        </dependency>
     
 2) Create an enumeration that defines the available fields and implements the Field interface:
 
-    public enum FooField implements Field {
-        ID("id"),
-        TITLE("title);
+       public enum FooField implements Field {
+          ID("id"),
+          TITLE("title);
 
-        private String fieldName;
-        
-        ExampleField(String fieldName) {
-            this.fieldName = fieldName;
-        }
-        @Override
-        public String getName() {
-            return fieldName;
-        }
-    }
+          private String fieldName;
+
+          ExampleField(String fieldName) {
+              this.fieldName = fieldName;
+          }
+          @Override
+          public String getName() {
+              return fieldName;
+          }
+       }
     
 3) Create a domain object that extends QueryResult:
 
-    public class Foo extends QueryResult<String> {
+        public class Foo extends QueryResult<String> {
 
-        private String title;
+          private String title;
 
-        public Foo(String s) {
-            super(s);
+          public Foo(String s) {
+              super(s);
+          }
+          public String getTitle() {
+              return title;
+          }
+          public void setTitle(String title) {
+              this.title = title;
+          }
         }
-        public String getTitle() {
-            return title;
-        }
-        public void setTitle(String title) {
-            this.title = title;
-        }
-    }
     
 4) Create a transformer that takes a SolrDocument and produces the domain object above:
 
-    public class FooTransformer implements SolrDocumentTransformer<Foo> {
-        @Override
-        public Foo transform(SolrDocument input) {
-            String id = getString(input, FooField.ID.getName());
-            String title = getString(input, FooField.TITLE.getName());
-            
-            Foo foo = new Foo(id);
-            foo.setTitle(title);
-            return foo;
+        public class FooTransformer implements SolrDocumentTransformer<Foo> {
+            @Override
+            public Foo transform(SolrDocument input) {
+                String id = getString(input, FooField.ID.getName());
+                String title = getString(input, FooField.TITLE.getName());
+
+                Foo foo = new Foo(id);
+                foo.setTitle(title);
+                return foo;
+            }
         }
-    }
     
 5) Create a query service that extends SolrQueryService and uses the transformer above:
 
-    public class FooQueryService extends SolrQueryService<Query,Foo> {
-        public FooQueryService(SolrClient solrClient) {
-            super(solrClient, new StandardSolrQueryFactory<>(), new FooTransformer());
+        public class FooQueryService extends SolrQueryService<Query,Foo> {
+            public FooQueryService(SolrClient solrClient) {
+                super(solrClient, new StandardSolrQueryFactory<>(), new FooTransformer());
+            }
         }
-    }
 
 6) Initialize the query service with the appropriate SolrClient and perform queries:
 
-    SolrClient solrClient = ...
-    QueryService<Query,Foo> queryService = new FooQueryService(solrClient);
-    
-    Query query = new Query("id:1");
-    QueryResults<Foo> results = queryService.search(query);
+        SolrClient solrClient = ...
+        QueryService<Query,Foo> queryService = new FooQueryService(solrClient);
+
+        Query query = new Query("id:1");
+        QueryResults<Foo> results = queryService.search(query);
     
     
 For additional information see the example in [tripod-query-solr/src/test/java](https://github.com/bbende/tripod/tree/master/tripod-query-solr/src/test/java/com/tripod/solr/example).
@@ -122,84 +122,84 @@ NOTE: Lucene support is not part of the Tripod 0.1.0 release.
 
 1) Add a Maven dependency on tripod-query-lucene:
 
-    <dependency>
-      <groupId>com.tripod</groupId>
-      <artifactId>tripod-query-lucene</artifactId>
-      <version>${tripod.version}</version>
-    </dependency>
+        <dependency>
+          <groupId>com.tripod</groupId>
+          <artifactId>tripod-query-lucene</artifactId>
+          <version>${tripod.version}</version>
+        </dependency>
     
 2) Create an enumeration that defines the available fields and implements the Field interface:
 
-    public enum FooField implements LuceneField {
-        ID("id", SortField.Type.STRING),
-        TITLE("title", SortField.Type.STRING),
-            
-        private String fieldName;
-        private SortField.Type sortType;
-    
-        ExampleField(String fieldName, SortField.Type sortType) {
-            this.fieldName = fieldName;
-            this.sortType = sortType;
+        public enum FooField implements LuceneField {
+            ID("id", SortField.Type.STRING),
+            TITLE("title", SortField.Type.STRING),
+
+            private String fieldName;
+            private SortField.Type sortType;
+
+            ExampleField(String fieldName, SortField.Type sortType) {
+                this.fieldName = fieldName;
+                this.sortType = sortType;
+            }
+            @Override
+            public String getName() {
+                return fieldName;
+            }
+            @Override
+            public SortField.Type getSortType() {
+                return sortType;
+            }
         }
-        @Override
-        public String getName() {
-            return fieldName;
-        }
-        @Override
-        public SortField.Type getSortType() {
-            return sortType;
-        }
-    }
     
 3) Create a domain object that extends QueryResult:
 
-    public class Foo extends QueryResult<String> {
+        public class Foo extends QueryResult<String> {
 
-        private String title;
+            private String title;
 
-        public Foo(String s) {
-            super(s);
+            public Foo(String s) {
+                super(s);
+            }
+            public String getTitle() {
+                return title;
+            }
+            public void setTitle(String title) {
+                this.title = title;
+            }
         }
-        public String getTitle() {
-            return title;
-        }
-        public void setTitle(String title) {
-            this.title = title;
-        }
-    }
     
 4) Create a transformer that takes a Lucene Document and produces the domain object above:
 
-    public class FooTransformer implements LuceneDocumentTransformer<Foo> {
-        @Override
-        public Foo transform(Document input) {
-            String id = input.get(ExampleField.ID.getName());
-            String title = input.get(ExampleField.TITLE.getName());
-            
-            Foo foo = new Foo(id);
-            foo.setTitle(title);
-            return foo;
+        public class FooTransformer implements LuceneDocumentTransformer<Foo> {
+            @Override
+            public Foo transform(Document input) {
+                String id = input.get(ExampleField.ID.getName());
+                String title = input.get(ExampleField.TITLE.getName());
+
+                Foo foo = new Foo(id);
+                foo.setTitle(title);
+                return foo;
+            }
         }
-    }
     
 5) Create a query service that extends LuceneQueryService and uses the transformer above:
 
-    public FooQueryService(final SearcherManager searcherManager, final String defaultField, final Analyzer analyzer) {
-            super(searcherManager, analyzer,
-                    new StandardLuceneQueryTransformer<>(defaultField, analyzer),
-                    new FooTransformer());
-        }
+        public FooQueryService(final SearcherManager searcherManager, final String defaultField, final Analyzer analyzer) {
+                super(searcherManager, analyzer,
+                        new StandardLuceneQueryTransformer<>(defaultField, analyzer),
+                        new FooTransformer());
+            }
 
 6) Initialize the query service with the appropriate SeacherManager, Analyzer, and default field, and perform queries:
 
-    String defaultField = ...
-    Analyzer analyzer = ...
-    SearcherManager searcherManager =...
-    
-    LuceneQueryService<LuceneQuery,Foo> queryService = new FooQueryService(searcherManager, defaultField, analyzer);
-    
-    LuceneQuery query = new LuceneQuery("id:1");
-    LuceneQueryResults<Foo> results = queryService.search(query);
+        String defaultField = ...
+        Analyzer analyzer = ...
+        SearcherManager searcherManager =...
+
+        LuceneQueryService<LuceneQuery,Foo> queryService = new FooQueryService(searcherManager, defaultField, analyzer);
+
+        LuceneQuery query = new LuceneQuery("id:1");
+        LuceneQueryResults<Foo> results = queryService.search(query);
     
     
 For additional information see the example in [tripod-query-lucene/src/test/java](https://github.com/bbende/tripod/tree/master/tripod-query-lucene/src/test/java/com/tripod/lucene/example).

@@ -306,7 +306,6 @@ language governing permissions and limitations under the License. -->
                 </plugins>
             </build>
         </profile>
-        <!--
         <profile>
             <id>release</id>
             <build>
@@ -328,7 +327,6 @@ language governing permissions and limitations under the License. -->
                 </plugins>
             </build>
         </profile>
-        -->
     </profiles>
 
 </project>

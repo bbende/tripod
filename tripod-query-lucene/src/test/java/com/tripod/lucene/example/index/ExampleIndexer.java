@@ -14,33 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query.result;
+package com.tripod.lucene.example.index;
 
-import com.tripod.api.entity.Entity;
-
-import java.util.List;
+import com.tripod.lucene.example.Example;
+import com.tripod.lucene.index.LuceneIndexer;
+import org.apache.lucene.facet.FacetsConfig;
+import org.apache.lucene.index.IndexWriter;
 
 /**
- * Base class for all QueryResults.
- *
- * @param <ID> the type of id for this result
+ * LuceneIndexer for Example entities.
  *
  * @author bbende
  */
-public class QueryResult<ID> extends Entity<ID> {
+public class ExampleIndexer extends LuceneIndexer<Example> {
 
-    private List<Highlight> highlights;
-
-    public QueryResult(final ID id) {
-        super(id);
-    }
-
-    public List<Highlight> getHighlights() {
-        return highlights;
-    }
-
-    public void setHighlights(List<Highlight> highlights) {
-        this.highlights = highlights;
+    public ExampleIndexer(final IndexWriter indexWriter, final FacetsConfig facetsConfig) {
+        super(indexWriter, facetsConfig, new ExampleIndexTransformer());
     }
 
 }

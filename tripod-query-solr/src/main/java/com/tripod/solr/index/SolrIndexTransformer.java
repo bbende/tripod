@@ -14,33 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query.result;
+package com.tripod.solr.index;
 
 import com.tripod.api.entity.Entity;
-
-import java.util.List;
+import com.tripod.api.entity.EntityTransformer;
+import org.apache.solr.common.SolrInputDocument;
 
 /**
- * Base class for all QueryResults.
- *
- * @param <ID> the type of id for this result
+ * Transforms Entities to SolrInputDocuments.
  *
  * @author bbende
  */
-public class QueryResult<ID> extends Entity<ID> {
-
-    private List<Highlight> highlights;
-
-    public QueryResult(final ID id) {
-        super(id);
-    }
-
-    public List<Highlight> getHighlights() {
-        return highlights;
-    }
-
-    public void setHighlights(List<Highlight> highlights) {
-        this.highlights = highlights;
-    }
+public interface SolrIndexTransformer<E extends Entity> extends EntityTransformer<E,SolrInputDocument> {
 
 }

@@ -14,33 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query.result;
+package com.tripod.lucene.query.service;
 
-import com.tripod.api.entity.Entity;
-
-import java.util.List;
+import com.tripod.api.Transformer;
+import com.tripod.api.query.result.QueryResult;
+import org.apache.lucene.document.Document;
 
 /**
- * Base class for all QueryResults.
- *
- * @param <ID> the type of id for this result
+ * Transforms a Lucene Document to the given type of QueryResult.
  *
  * @author bbende
  */
-public class QueryResult<ID> extends Entity<ID> {
-
-    private List<Highlight> highlights;
-
-    public QueryResult(final ID id) {
-        super(id);
-    }
-
-    public List<Highlight> getHighlights() {
-        return highlights;
-    }
-
-    public void setHighlights(List<Highlight> highlights) {
-        this.highlights = highlights;
-    }
+public interface LuceneDocumentTransformer<QR extends QueryResult> extends Transformer<Document,QR> {
 
 }

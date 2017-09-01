@@ -14,33 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query.result;
+package com.tripod.api.entity;
 
-import com.tripod.api.entity.Entity;
-
-import java.util.List;
+import com.tripod.api.Transformer;
 
 /**
- * Base class for all QueryResults.
- *
- * @param <ID> the type of id for this result
+ * Transformer that transforms and Entity to another object.
  *
  * @author bbende
  */
-public class QueryResult<ID> extends Entity<ID> {
-
-    private List<Highlight> highlights;
-
-    public QueryResult(final ID id) {
-        super(id);
-    }
-
-    public List<Highlight> getHighlights() {
-        return highlights;
-    }
-
-    public void setHighlights(List<Highlight> highlights) {
-        this.highlights = highlights;
-    }
+public interface EntityTransformer<E extends Entity, O> extends Transformer<E,O> {
 
 }

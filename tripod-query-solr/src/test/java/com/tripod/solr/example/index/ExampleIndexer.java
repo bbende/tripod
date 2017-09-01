@@ -14,33 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query.result;
+package com.tripod.solr.example.index;
 
-import com.tripod.api.entity.Entity;
-
-import java.util.List;
+import com.tripod.solr.example.Example;
+import com.tripod.solr.index.SolrIndexer;
+import org.apache.solr.client.solrj.SolrClient;
 
 /**
- * Base class for all QueryResults.
- *
- * @param <ID> the type of id for this result
+ * SolrIndexer for Example entities.
  *
  * @author bbende
  */
-public class QueryResult<ID> extends Entity<ID> {
+public class ExampleIndexer extends SolrIndexer<Example> {
 
-    private List<Highlight> highlights;
-
-    public QueryResult(final ID id) {
-        super(id);
-    }
-
-    public List<Highlight> getHighlights() {
-        return highlights;
-    }
-
-    public void setHighlights(List<Highlight> highlights) {
-        this.highlights = highlights;
+    public ExampleIndexer(final SolrClient solrClient) {
+        super(solrClient, new ExampleIndexTransformer());
     }
 
 }

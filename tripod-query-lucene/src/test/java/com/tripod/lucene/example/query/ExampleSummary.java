@@ -14,33 +14,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query.result;
+package com.tripod.lucene.example.query;
 
-import com.tripod.api.entity.Entity;
+import com.tripod.api.query.result.QueryResult;
 
-import java.util.List;
+import java.util.Date;
 
 /**
- * Base class for all QueryResults.
+ * Example QueryResult implementation for search result summary.
  *
- * @param <ID> the type of id for this result
+ * This class would act as the "search result".
  *
  * @author bbende
  */
-public class QueryResult<ID> extends Entity<ID> {
+public class ExampleSummary extends QueryResult<String> {
 
-    private List<Highlight> highlights;
+    private String title;
+    private String color;
+    private Date createDate;
 
-    public QueryResult(final ID id) {
-        super(id);
+    public ExampleSummary(String s) {
+        super(s);
     }
 
-    public List<Highlight> getHighlights() {
-        return highlights;
+    public String getTitle() {
+        return title;
     }
 
-    public void setHighlights(List<Highlight> highlights) {
-        this.highlights = highlights;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
     }
 
 }

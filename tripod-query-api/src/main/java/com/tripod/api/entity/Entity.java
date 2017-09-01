@@ -14,33 +14,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query.result;
+package com.tripod.api.entity;
 
-import com.tripod.api.entity.Entity;
+import org.apache.commons.lang.Validate;
 
-import java.util.List;
+import java.util.Objects;
 
 /**
- * Base class for all QueryResults.
- *
- * @param <ID> the type of id for this result
+ * Base class for all entities.
  *
  * @author bbende
  */
-public class QueryResult<ID> extends Entity<ID> {
+public abstract class Entity<ID> {
 
-    private List<Highlight> highlights;
+    private final ID id;
 
-    public QueryResult(final ID id) {
-        super(id);
+    public Entity(final ID id) {
+        this.id = id;
+        Validate.notNull(this.id);
     }
 
-    public List<Highlight> getHighlights() {
-        return highlights;
+    public ID getId() {
+        return id;
     }
 
-    public void setHighlights(List<Highlight> highlights) {
-        this.highlights = highlights;
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (!(obj instanceof Entity)) {
+            return false;
+        }
+
+        final Entity other = (Entity) obj;
+        return Objects.equals(this.id, other.getId());
     }
 
 }

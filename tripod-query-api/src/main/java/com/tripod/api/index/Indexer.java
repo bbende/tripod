@@ -14,33 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query.result;
+package com.tripod.api.index;
 
 import com.tripod.api.entity.Entity;
 
-import java.util.List;
-
 /**
- * Base class for all QueryResults.
- *
- * @param <ID> the type of id for this result
+ * A service indexing entities.
  *
  * @author bbende
  */
-public class QueryResult<ID> extends Entity<ID> {
+public interface Indexer<E extends Entity> {
 
-    private List<Highlight> highlights;
+    /**
+     * Adds the given entity to the index.
+     *
+     * @param entity the entity to index
+     * @throws IndexException if an error occurs while adding the entity to the index
+     */
+    void index(E entity) throws IndexException;
 
-    public QueryResult(final ID id) {
-        super(id);
-    }
-
-    public List<Highlight> getHighlights() {
-        return highlights;
-    }
-
-    public void setHighlights(List<Highlight> highlights) {
-        this.highlights = highlights;
-    }
+    /**
+     * Commits any changes to the index.
+     *
+     * @throws IndexException if an error occurs attempting commit
+     */
+    void commit() throws IndexException;
 
 }

@@ -14,33 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query.result;
+package com.tripod.lucene.example.query;
 
-import com.tripod.api.entity.Entity;
-
-import java.util.List;
+import com.tripod.lucene.query.LuceneQuery;
+import com.tripod.lucene.query.StandardLuceneQueryTransformer;
+import com.tripod.lucene.query.service.LuceneQueryService;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.search.SearcherManager;
 
 /**
- * Base class for all QueryResults.
- *
- * @param <ID> the type of id for this result
+ * LuceneQueryService implementation for ExampleSummary.
  *
  * @author bbende
  */
-public class QueryResult<ID> extends Entity<ID> {
+public class ExampleSummaryQueryService extends LuceneQueryService<LuceneQuery,ExampleSummary> {
 
-    private List<Highlight> highlights;
-
-    public QueryResult(final ID id) {
-        super(id);
-    }
-
-    public List<Highlight> getHighlights() {
-        return highlights;
-    }
-
-    public void setHighlights(List<Highlight> highlights) {
-        this.highlights = highlights;
+    public ExampleSummaryQueryService(final SearcherManager searcherManager,
+                                      final String defaultField,
+                                      final Analyzer analyzer) {
+        super(searcherManager, analyzer,
+                new StandardLuceneQueryTransformer<>(defaultField, analyzer),
+                new ExampleSummaryTransformer());
     }
 
 }

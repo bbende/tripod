@@ -14,33 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query.result;
+package com.tripod.solr.example.query;
 
-import com.tripod.api.entity.Entity;
-
-import java.util.List;
+import com.tripod.api.query.Query;
+import com.tripod.solr.query.StandardSolrQueryTransformer;
+import com.tripod.solr.query.service.SolrQueryService;
+import org.apache.solr.client.solrj.SolrClient;
 
 /**
- * Base class for all QueryResults.
- *
- * @param <ID> the type of id for this result
+ * SolrQueryService implementation for ExampleSummary.
  *
  * @author bbende
  */
-public class QueryResult<ID> extends Entity<ID> {
+public class ExampleSummaryQueryService extends SolrQueryService<Query,ExampleSummary> {
 
-    private List<Highlight> highlights;
-
-    public QueryResult(final ID id) {
-        super(id);
-    }
-
-    public List<Highlight> getHighlights() {
-        return highlights;
-    }
-
-    public void setHighlights(List<Highlight> highlights) {
-        this.highlights = highlights;
+    public ExampleSummaryQueryService(SolrClient solrClient) {
+        super(solrClient, new StandardSolrQueryTransformer<>(), new ExampleSummaryTransformer());
     }
 
 }

@@ -14,33 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query.result;
-
-import com.tripod.api.entity.Entity;
-
-import java.util.List;
+package com.tripod.api.index;
 
 /**
- * Base class for all QueryResults.
- *
- * @param <ID> the type of id for this result
+ * An error that occurs during indexing.
  *
  * @author bbende
  */
-public class QueryResult<ID> extends Entity<ID> {
+public class IndexException extends Exception {
 
-    private List<Highlight> highlights;
-
-    public QueryResult(final ID id) {
-        super(id);
+    public IndexException(String message) {
+        super(message);
     }
 
-    public List<Highlight> getHighlights() {
-        return highlights;
+    public IndexException(String message, Throwable cause) {
+        super(message, cause);
     }
-
-    public void setHighlights(List<Highlight> highlights) {
-        this.highlights = highlights;
-    }
-
 }

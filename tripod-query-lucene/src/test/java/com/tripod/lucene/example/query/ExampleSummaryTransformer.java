@@ -17,6 +17,7 @@
 package com.tripod.lucene.example.query;
 
 import com.tripod.lucene.example.ExampleField;
+import com.tripod.lucene.example.ExampleSummary;
 import com.tripod.lucene.query.service.LuceneDocumentTransformer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;

@@ -47,24 +47,24 @@ import java.util.Map;
  *
  * @author bbende
  */
-public abstract class SolrService<Q extends Query, QR extends QueryResult> {
+public abstract class SolrService<QR extends QueryResult> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SolrQueryService.class);
 
     protected final SolrClient solrClient;
-    protected final SolrQueryTransformer<Q> queryFactory;
-    protected final SolrDocumentTransformer<QR> solrDocumentTransformer;
+    protected final SolrQueryTransformer queryTransformer;
+    protected final SolrDocumentTransformer<QR> documentTransformer;
     protected SolrRequest.METHOD defaultMethod = SolrRequest.METHOD.GET;
 
     public SolrService(final SolrClient solrClient,
-                       final SolrQueryTransformer<Q> queryFactory,
-                       final SolrDocumentTransformer<QR> solrDocumentTransformer) {
+                       final SolrQueryTransformer queryTransformer,
+                       final SolrDocumentTransformer<QR> documentTransformer) {
         this.solrClient = solrClient;
-        this.queryFactory = queryFactory;
-        this.solrDocumentTransformer = solrDocumentTransformer;
+        this.queryTransformer = queryTransformer;
+        this.documentTransformer = documentTransformer;
         Validate.notNull(this.solrClient);
-        Validate.notNull(this.queryFactory);
-        Validate.notNull(this.solrDocumentTransformer);
+        Validate.notNull(this.queryTransformer);
+        Validate.notNull(this.documentTransformer);
     }
 
     public void setDefautMethod(SolrRequest.METHOD method) {
@@ -79,10 +79,10 @@ public abstract class SolrService<Q extends Query, QR extends QueryResult> {
      * @return the QueryResults
      * @throws QueryException if an error ocurred performing the search
      */
-    protected QueryResults<QR> performSearch(Q query) throws QueryException {
+    protected QueryResults<QR> performSearch(final Query query) throws QueryException {
         try {
             // Convert from Query API to SolrQuery
-            final SolrQuery solrQuery = queryFactory.transform(query);
+            final SolrQuery solrQuery = queryTransformer.transform(query);
             final SolrRequest.METHOD method = getMethod(query);
 
             // Start the results builder with the offset and rows from the query
@@ -100,7 +100,7 @@ public abstract class SolrService<Q extends Query, QR extends QueryResult> {
 
             // Transform each Solr doc to a QueryResult and add highlights if they exist
             for (SolrDocument solrDoc : solrDocs) {
-                final QR queryResult = solrDocumentTransformer.transform(solrDoc);
+                final QR queryResult = documentTransformer.transform(solrDoc);
                 if (queryResult != null) {
                     processHighlighting(queryResult, highlighting);
                     resultsBuilder.addResult(queryResult);
@@ -112,6 +112,7 @@ public abstract class SolrService<Q extends Query, QR extends QueryResult> {
             processFacetResults(resultsBuilder, facetFields);
 
             resultsBuilder.totalResults(solrDocs.getNumFound());
+            resultsBuilder.cursorMark(response.getNextCursorMark());
             return resultsBuilder.build();
 
         } catch (SolrServerException e) {
@@ -131,7 +132,7 @@ public abstract class SolrService<Q extends Query, QR extends QueryResult> {
      * @param query incoming query
      * @return the method on the query, or the default method
      */
-    private SolrRequest.METHOD getMethod(Q query) {
+    private SolrRequest.METHOD getMethod(Query query) {
         SolrRequest.METHOD method = defaultMethod;
         if (query.getRequestMethod() != null) {
             switch (query.getRequestMethod()) {

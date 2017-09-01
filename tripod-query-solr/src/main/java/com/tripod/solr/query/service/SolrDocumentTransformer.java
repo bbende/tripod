@@ -17,7 +17,7 @@
 package com.tripod.solr.query.service;
 
 import com.tripod.api.Transformer;
-import com.tripod.api.query.result.QueryResult;
+import com.tripod.api.entity.Entity;
 import org.apache.solr.common.SolrDocument;
 
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import java.util.Set;
  *
  * @author bbende
  */
-public interface SolrDocumentTransformer<QR extends QueryResult> extends Transformer<SolrDocument,QR> {
+public interface SolrDocumentTransformer<E extends Entity> extends Transformer<SolrDocument,E> {
 
     /**
      * Safely gets an Set of Strings for the given field.

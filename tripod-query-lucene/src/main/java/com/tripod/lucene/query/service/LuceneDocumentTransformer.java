@@ -17,14 +17,14 @@
 package com.tripod.lucene.query.service;
 
 import com.tripod.api.Transformer;
-import com.tripod.api.query.result.QueryResult;
+import com.tripod.api.entity.Entity;
 import org.apache.lucene.document.Document;
 
 /**
- * Transforms a Lucene Document to the given type of QueryResult.
+ * Transforms a Lucene Document to the given type of Entity.
  *
  * @author bbende
  */
-public interface LuceneDocumentTransformer<QR extends QueryResult> extends Transformer<Document,QR> {
+public interface LuceneDocumentTransformer<E extends Entity> extends Transformer<Document,E> {
 
 }

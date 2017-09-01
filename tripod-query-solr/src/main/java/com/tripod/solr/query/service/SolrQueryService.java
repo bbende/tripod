@@ -29,17 +29,16 @@ import org.apache.solr.client.solrj.SolrClient;
  *
  * @author bbende
  */
-public class SolrQueryService<Q extends Query, QR extends QueryResult> extends SolrService<Q,QR>
-        implements QueryService<Q,QR> {
+public class SolrQueryService<QR extends QueryResult> extends SolrService<QR> implements QueryService<QR> {
 
     public SolrQueryService(final SolrClient solrClient,
-                            final SolrQueryTransformer<Q> queryFactory,
-                            final SolrDocumentTransformer<QR> solrDocumentTransformer) {
-        super(solrClient, queryFactory, solrDocumentTransformer);
+                            final SolrQueryTransformer queryTransformer,
+                            final SolrDocumentTransformer<QR> documentTransformer) {
+        super(solrClient, queryTransformer, documentTransformer);
     }
 
     @Override
-    public QueryResults<QR> search(Q query) throws QueryException {
+    public QueryResults<QR> search(final Query query) throws QueryException {
         return performSearch(query);
     }
 

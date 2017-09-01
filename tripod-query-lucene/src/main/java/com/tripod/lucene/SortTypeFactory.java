@@ -14,27 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.entity;
+package com.tripod.lucene;
 
 import com.tripod.api.Field;
+import org.apache.lucene.search.SortField;
 
 /**
- * Represents an entity that may be indexed and/or searched.
- *
- * All entities must have an id field of type string.
+ * Provides a look-up to obtain the SortField.Type for a given field.
  *
  * @author bbende
  */
-public interface Entity {
+public interface SortTypeFactory {
 
     /**
-     * @return the id of this entity
+     * @param f a field being sorted on
+     * @return the sort type for the field
      */
-    String getId();
-
-    /**
-     * @return the id field in the index for this entity
-     */
-    Field getIdField();
+    SortField.Type getSortType(Field f);
 
 }

@@ -14,51 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.solr.example.query;
+package com.tripod.api.query.result;
 
-import com.tripod.api.query.result.QueryResult;
+import com.tripod.api.Field;
+import com.tripod.api.entity.AbstractEntity;
 
-import java.util.Date;
+import java.util.List;
 
 /**
- * Example QueryResult implementation for search result summary.
- *
- * This class would act as the "search result".
+ * Base implementation for QueryResult.
  *
  * @author bbende
  */
-public class ExampleSummary extends QueryResult<String> {
+public abstract class AbstractQueryResult extends AbstractEntity
+        implements QueryResult {
 
-    private String title;
-    private String color;
-    private Date createDate;
+    private List<Highlight> highlights;
 
-    public ExampleSummary(String s) {
-        super(s);
+    public AbstractQueryResult(final Field idField, final String id) {
+        super(idField, id);
     }
 
-    public String getTitle() {
-        return title;
+    @Override
+    public List<Highlight> getHighlights() {
+        return highlights;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public Date getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(Date createDate) {
-        this.createDate = createDate;
+    @Override
+    public void setHighlights(List<Highlight> highlights) {
+        this.highlights = highlights;
     }
 
 }

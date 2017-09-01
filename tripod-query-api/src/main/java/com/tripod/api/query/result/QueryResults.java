@@ -30,6 +30,7 @@ public class QueryResults<QR extends QueryResult> {
     private final int pageSize;
     private final long offset;
     private final long totalResults;
+    private final String cursorMark;
 
     private final List<QR> results;
     private final List<FacetResult> facetResults;
@@ -38,6 +39,7 @@ public class QueryResults<QR extends QueryResult> {
         this.offset = builder.offset;
         this.pageSize = builder.pageSize;
         this.totalResults = builder.totalResults;
+        this.cursorMark = builder.cursorMark;
         this.results = Collections.unmodifiableList(new ArrayList<QR>(builder.results));
         this.facetResults = Collections.unmodifiableList(new ArrayList<>(builder.facetResults));
     }
@@ -52,6 +54,10 @@ public class QueryResults<QR extends QueryResult> {
 
     public long getTotalResults() {
         return totalResults;
+    }
+
+    public String getCursorMark() {
+        return cursorMark;
     }
 
     public List<QR> getResults() {
@@ -71,6 +77,7 @@ public class QueryResults<QR extends QueryResult> {
         private int pageSize;
         private long offset;
         private long totalResults;
+        private String cursorMark;
         private List<QR> results = new ArrayList<>();
         private List<FacetResult> facetResults = new ArrayList<>();
 
@@ -86,6 +93,11 @@ public class QueryResults<QR extends QueryResult> {
 
         public Builder<QR> totalResults(long totalResults) {
             this.totalResults = totalResults;
+            return this;
+        }
+
+        public Builder<QR> cursorMark(String cursorMark) {
+            this.cursorMark = cursorMark;
             return this;
         }
 

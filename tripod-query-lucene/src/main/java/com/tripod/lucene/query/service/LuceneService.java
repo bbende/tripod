@@ -18,16 +18,18 @@ package com.tripod.lucene.query.service;
 
 import com.tripod.api.Field;
 import com.tripod.api.TransformException;
-import com.tripod.api.query.SortOrder;
+import com.tripod.api.query.Query;
 import com.tripod.api.query.result.FacetCount;
 import com.tripod.api.query.result.FacetResult;
 import com.tripod.api.query.result.Highlight;
 import com.tripod.api.query.result.QueryResult;
+import com.tripod.api.query.result.QueryResults;
 import com.tripod.api.query.service.QueryException;
-import com.tripod.lucene.LuceneField;
-import com.tripod.lucene.query.LuceneQuery;
-import com.tripod.lucene.query.LuceneQueryResults;
+import com.tripod.lucene.SortTypeFactory;
+import com.tripod.lucene.query.LuceneCursorMark;
 import com.tripod.lucene.query.LuceneQueryTransformer;
+import com.tripod.lucene.query.serialization.FieldDocSerializer;
+import com.tripod.lucene.query.serialization.StandardFieldDocSerializer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.lucene.analysis.Analyzer;
@@ -45,11 +47,9 @@ import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.FieldDoc;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MultiCollector;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TopFieldCollector;
 import org.apache.lucene.search.highlight.Highlighter;
 import org.apache.lucene.search.highlight.InvalidTokenOffsetsException;
@@ -63,6 +63,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -75,26 +76,69 @@ import java.util.stream.Collectors;
  *
  * @author bbende
  */
-public class LuceneService<Q extends LuceneQuery, QR extends QueryResult> {
+public class LuceneService<QR extends QueryResult> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LuceneService.class);
 
+    static final Integer DEFAULT_MAX_SEARCH_RESULTS = new Integer(10000);
+
     protected final Analyzer analyzer;
     protected final SearcherManager searcherManager;
-    protected final LuceneQueryTransformer<Q> queryTransformer;
+    protected final LuceneQueryTransformer queryTransformer;
     protected final LuceneDocumentTransformer<QR> documentTransformer;
+    protected final SortTypeFactory sortTypeFactory;
+    protected final FieldDocSerializer fieldDocSerializer;
+    protected final Integer maxSearchResults;
+
+    private String highlightPreTag = "<strong>";
+    private String highlightPostTag = "</strong>";
 
     public LuceneService(final SearcherManager searcherManager,
                          final Analyzer analyzer,
-                         final LuceneQueryTransformer<Q> queryTransformer,
-                         final LuceneDocumentTransformer<QR> documentTransformer) {
+                         final LuceneQueryTransformer queryTransformer,
+                         final LuceneDocumentTransformer<QR> documentTransformer,
+                         final SortTypeFactory sortTypeFactory) {
+        this(searcherManager, analyzer, queryTransformer, documentTransformer,
+                sortTypeFactory, DEFAULT_MAX_SEARCH_RESULTS);
+    }
+
+    public LuceneService(final SearcherManager searcherManager,
+                         final Analyzer analyzer,
+                         final LuceneQueryTransformer queryTransformer,
+                         final LuceneDocumentTransformer<QR> documentTransformer,
+                         final SortTypeFactory sortTypeFactory,
+                         final Integer maxSearchResults) {
         this.searcherManager = searcherManager;
         this.analyzer = analyzer;
         this.queryTransformer = queryTransformer;
         this.documentTransformer = documentTransformer;
+        this.sortTypeFactory = sortTypeFactory;
+        this.maxSearchResults = maxSearchResults;
+        this.fieldDocSerializer = new StandardFieldDocSerializer();
+
         Validate.notNull(this.searcherManager);
         Validate.notNull(this.queryTransformer);
         Validate.notNull(this.documentTransformer);
+        Validate.notNull(this.sortTypeFactory);
+        Validate.notNull(this.maxSearchResults);
+    }
+
+    public String getHighlightPreTag() {
+        return highlightPreTag;
+    }
+
+    public void setHighlightPreTag(String highlightPreTag) {
+        Validate.notNull(highlightPreTag);
+        this.highlightPreTag = highlightPreTag;
+    }
+
+    public String getHighlightPostTag() {
+        return highlightPostTag;
+    }
+
+    public void setHighlightPostTag(String highlightPostTag) {
+        Validate.notNull(highlightPostTag);
+        this.highlightPostTag = highlightPostTag;
     }
 
     /**
@@ -104,18 +148,19 @@ public class LuceneService<Q extends LuceneQuery, QR extends QueryResult> {
      * @return the QueryResults
      * @throws QueryException if an error occurred performing the search
      */
-    protected LuceneQueryResults<QR> performSearch(Q query) throws QueryException {
+    protected QueryResults<QR> performSearch(final Query query) throws QueryException {
         IndexSearcher searcher = null;
         try {
             // Acquire an IndexSearcher
             searcher = searcherManager.acquire();
 
             // Start the results builder with the offset and rows from the query
-            final LuceneQueryResults.Builder<QR> resultsBuilder = new LuceneQueryResults.Builder<QR>()
+            final QueryResults.Builder<QR> resultsBuilder = new QueryResults.Builder<QR>()
+                    .offset(query.getOffset())
                     .pageSize(query.getRows());
 
             // Create a searcher and get a Lucene query
-            final Query luceneQuery = queryTransformer.transform(query);
+            final org.apache.lucene.search.Query luceneQuery = queryTransformer.transform(query);
 
             // Get the return fields
             final Set<String> fieldsToLoad = new HashSet<>();
@@ -129,15 +174,29 @@ public class LuceneService<Q extends LuceneQuery, QR extends QueryResult> {
                 query.getFacetFields().stream().forEach(f -> facetFields.add(f.getName()));
             }
 
-            final Sort sort = getSort(query.getSorts());
+            final Sort sort = getSort(query.getSorts(), sortTypeFactory);
             final Highlighter highlighter = getHighlighter(query, luceneQuery);
 
             // Collector to use when faceting
             final FacetsCollector facetsCollector = new FacetsCollector();
 
-            // Collector for sorted/paged results
+            // fillFields needs to be true to get instances of FieldDoc coming back for the ScoreDoc[]
+            final boolean fillFields = true;
+            final boolean trackScores = false;
+            final boolean trackMaxScore = false;
+
+            final boolean usingCursorMark = query.getCursorMark() != null;
+
+            // if using cursorMark we only need to find # of rows after the cursors, otherwise we need
+            // to find all the results up to maxSearchResults
+            final int numResults = usingCursorMark ? query.getRows() : maxSearchResults;
+
+            // if not using cursorMark this should end up being null which would be
+            // the same thing as calling TopFieldCollector.create without afterDoc
+            final FieldDoc prevLastDoc = toFieldDoc(query.getCursorMark());
+
             final TopFieldCollector topFieldCollector = TopFieldCollector.create(
-                    sort, query.getRows(), (FieldDoc)query.getAfterDoc(), true, false, false);
+                    sort, numResults, prevLastDoc, fillFields, trackScores, trackMaxScore);
 
             // Wrapped collector depending on whether faceting or not
             final Collector collector = facetFields.isEmpty()
@@ -145,25 +204,44 @@ public class LuceneService<Q extends LuceneQuery, QR extends QueryResult> {
 
             // Perform the Lucene query
             final long startTime = System.currentTimeMillis();
-            FacetsCollector.searchAfter(searcher, query.getAfterDoc(), luceneQuery, query.getRows(), sort, collector);
+
+            ScoreDoc[] scoreDocs;
+            if (usingCursorMark) {
+                FacetsCollector.searchAfter(searcher, prevLastDoc, luceneQuery, query.getRows(), sort, collector);
+                scoreDocs = topFieldCollector.topDocs().scoreDocs;
+                LOGGER.debug("Queried with cursorMark = " + query.getCursorMark());
+            } else {
+                searcher.search(luceneQuery, collector);
+                scoreDocs = topFieldCollector.topDocs(query.getOffset(), query.getRows()).scoreDocs;
+                LOGGER.debug("Queried with offset = " + query.getOffset());
+            }
+
             LOGGER.debug("Query executed in " + (System.currentTimeMillis() - startTime));
 
             // Transform each Lucene Document to a QueryResult
-            ScoreDoc afterDoc = null;
-            for (ScoreDoc scoreDoc : topFieldCollector.topDocs().scoreDocs) {
+            ScoreDoc lastDoc = null;
+            for (ScoreDoc scoreDoc : scoreDocs) {
                 final Document doc = getDoc(searcher, scoreDoc.doc, fieldsToLoad);
                 final QR result = documentTransformer.transform(doc);
                 performHighlighting(searcher, query, scoreDoc, doc, highlighter, result);
 
                 resultsBuilder.addResult(result);
-                afterDoc = scoreDoc;
+                lastDoc = scoreDoc;
             }
 
             // Get faceting results
             processFacetResults(searcher, facetsCollector, facetFields, resultsBuilder);
 
-            // Store the last ScoreDoc so it can be passed back for the next page
-            resultsBuilder.afterDoc(afterDoc);
+            // Send back the last doc as a cursorMark so it can be passed back for the next page
+            // If lastDoc is null it means there were no results, so send back the same cursorMark that was passed in
+            if (usingCursorMark) {
+                if (lastDoc == null) {
+                    resultsBuilder.cursorMark(query.getCursorMark());
+                } else {
+                    resultsBuilder.cursorMark(toCursorMark((FieldDoc)lastDoc));
+                }
+            }
+
             resultsBuilder.totalResults(topFieldCollector.getTotalHits());
             return resultsBuilder.build();
 
@@ -178,9 +256,22 @@ public class LuceneService<Q extends LuceneQuery, QR extends QueryResult> {
                 } catch (IOException e) {
                     LOGGER.warn("Error releasing IndexSearcher: " + e.getMessage(), e);
                 }
-                searcher = null;
             }
         }
+    }
+
+    private String toCursorMark(final FieldDoc fieldDoc) {
+        final byte[] serializedFieldDoc = fieldDocSerializer.serialize(fieldDoc);
+        return Base64.getEncoder().encodeToString(serializedFieldDoc);
+    }
+
+    private FieldDoc toFieldDoc(final String cursorMark) {
+        if (cursorMark == null || LuceneCursorMark.START.equals(cursorMark)) {
+            return null;
+        }
+
+        final byte[] rawCursorMark = Base64.getDecoder().decode(cursorMark);
+        return fieldDocSerializer.deserialize(rawCursorMark);
     }
 
     /**
@@ -188,11 +279,12 @@ public class LuceneService<Q extends LuceneQuery, QR extends QueryResult> {
      * @param luceneQuery the Lucene query being performed
      * @return the highlighter to use if the tripod query has one or more highlight fields, or null
      */
-    private Highlighter getHighlighter(final Q query, final Query luceneQuery) {
+    private Highlighter getHighlighter(final Query query, final org.apache.lucene.search.Query luceneQuery) {
         Highlighter highlighter = null;
         if (query.getHighlightFields() != null && query.getHighlightFields().size() > 0) {
             SimpleHTMLEncoder simpleHTMLEncoder = new SimpleHTMLEncoder();
-            SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter(query.getHighlightPreTag(), query.getHighlightPostTag());
+            SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter(
+                    getHighlightPreTag(), getHighlightPostTag());
             highlighter = new Highlighter(simpleHTMLFormatter, simpleHTMLEncoder, new QueryScorer(luceneQuery));
         }
         return highlighter;
@@ -207,12 +299,7 @@ public class LuceneService<Q extends LuceneQuery, QR extends QueryResult> {
      */
     protected Document getDoc(final IndexSearcher searcher, final int doc, final Set<String> fieldsToLoad)
             throws IOException {
-        if (fieldsToLoad == null || fieldsToLoad.size() == 0
-                || (fieldsToLoad.size() == 1 && fieldsToLoad.contains(Field.ALL_FIELDS.getName()))) {
-            return searcher.doc(doc);
-        } else {
-            return searcher.doc(doc, fieldsToLoad);
-        }
+        return LuceneServiceUtil.getDoc(searcher, doc, fieldsToLoad);
     }
 
     /**
@@ -222,21 +309,8 @@ public class LuceneService<Q extends LuceneQuery, QR extends QueryResult> {
      * @return the Lucene Sort matching the given Tripod Sorts,
      *              or the Lucene Sort for relevance order if no sorts are specified
      */
-    protected Sort getSort(List<com.tripod.api.query.Sort<LuceneField>> sorts) {
-        if (sorts == null || sorts.isEmpty()) {
-            return Sort.RELEVANCE;
-        } else {
-            List<SortField> luceneSorts = new ArrayList<>();
-            for (com.tripod.api.query.Sort<LuceneField> sort : sorts) {
-                boolean reverse = (sort.getSortOrder() == SortOrder.DESC);
-                luceneSorts.add(
-                        new SortField(
-                                sort.getField().getName(),
-                                sort.getField().getSortType(),
-                                reverse));
-            }
-            return new Sort(luceneSorts.toArray(new SortField[luceneSorts.size()]));
-        }
+    protected Sort getSort(List<com.tripod.api.query.Sort> sorts, SortTypeFactory sortTypeFactory) {
+        return LuceneServiceUtil.getSort(sorts, sortTypeFactory);
     }
 
     /**
@@ -251,7 +325,7 @@ public class LuceneService<Q extends LuceneQuery, QR extends QueryResult> {
      * @throws IOException if an error occurs performing the highlighting
      * @throws InvalidTokenOffsetsException if an error occurs performing the highlighting
      */
-    protected void performHighlighting(final IndexSearcher indexSearcher, final Q query, final ScoreDoc scoreDoc,
+    protected void performHighlighting(final IndexSearcher indexSearcher, final Query query, final ScoreDoc scoreDoc,
                                        final Document doc, final Highlighter highlighter, final QR result)
             throws IOException, InvalidTokenOffsetsException {
 
@@ -297,14 +371,14 @@ public class LuceneService<Q extends LuceneQuery, QR extends QueryResult> {
      * @return the list of field names to highlight on coming from the query, or if the query has
      *              highlight on all fields then we get all the field names fromt he document
      */
-    private List<String> getHighlightFieldNames(LuceneQuery query, Document doc) {
+    private List<String> getHighlightFieldNames(Query query, Document doc) {
         final List<String> hlFieldNames = new ArrayList<>();
         if (query.getHighlightFields().size() == 1
-                && query.getHighlightFields().get(0).getName().equals(LuceneField.ALL_LUCENE_FIELDS.getName())) {
+                && query.getHighlightFields().get(0).getName().equals(Field.ALL_FIELDS.getName())) {
             hlFieldNames.addAll(doc.getFields().stream().map(IndexableField::name)
                     .collect(Collectors.toList()));
         } else {
-            hlFieldNames.addAll(query.getHighlightFields().stream().map(LuceneField::getName)
+            hlFieldNames.addAll(query.getHighlightFields().stream().map(Field::getName)
                     .collect(Collectors.toList()));
         }
         return hlFieldNames;
@@ -320,23 +394,28 @@ public class LuceneService<Q extends LuceneQuery, QR extends QueryResult> {
      * @throws IOException if an error occurs performing faceting
      */
     protected void processFacetResults(final IndexSearcher indexSearcher, final FacetsCollector facetsCollector, final Set<String> facetFields,
-                                       final LuceneQueryResults.Builder<QR> resultBuilder) throws IOException {
+                                       final QueryResults.Builder<QR> resultBuilder) throws IOException {
         if (facetFields == null) {
             return;
         }
 
         for (String facetField : facetFields) {
             final List<FacetCount> facetResultCounts = new ArrayList<>();
-            final SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(
-                    indexSearcher.getIndexReader(), facetField);
-            final Facets facets = new SortedSetDocValuesFacetCounts(state, facetsCollector);
 
-            org.apache.lucene.facet.FacetResult result = facets.getTopChildren(10, facetField);
-            for (int i = 0; i < result.childCount; i++) {
-                LabelAndValue lv = result.labelValues[i];
-                facetResultCounts.add(new FacetCount(lv.label, lv.value.longValue()));
+            // TODO this will produce an exception if no documents were indexed with the field to facet on
+            // java.lang.IllegalArgumentException: field "foo" was not indexed with SortedSetDocValues
+            // at org.apache.lucene.facet.sortedset.DefaultSortedSetDocValuesReaderState.<init>(DefaultSortedSetDocValuesReaderState.java:72)
+
+           if (facetsCollector.getMatchingDocs() != null && facetsCollector.getMatchingDocs().size() > 0) {
+                final SortedSetDocValuesReaderState state = new DefaultSortedSetDocValuesReaderState(indexSearcher.getIndexReader(), facetField);
+                final Facets facets = new SortedSetDocValuesFacetCounts(state, facetsCollector);
+
+                org.apache.lucene.facet.FacetResult result = facets.getTopChildren(10, facetField);
+                for (int i = 0; i < result.childCount; i++) {
+                    LabelAndValue lv = result.labelValues[i];
+                    facetResultCounts.add(new FacetCount(lv.label, lv.value.longValue()));
+                }
             }
-
             resultBuilder.addFacetResult(new FacetResult(facetField, facetResultCounts));
         }
     }

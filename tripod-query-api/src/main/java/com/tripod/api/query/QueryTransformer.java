@@ -22,9 +22,8 @@ import com.tripod.api.Transformer;
  * Transformer that converts Query instances to another type.
  *
  * @author bbende
- * @param <I> The type of query that will be transformed
  * @param <O> The type of query that will be returned
  */
-public interface QueryTransformer<I extends Query, O> extends Transformer<I,O> {
+public interface QueryTransformer<O> extends Transformer<Query,O> {
 
 }

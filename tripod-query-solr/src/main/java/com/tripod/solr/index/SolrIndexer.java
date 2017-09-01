@@ -16,6 +16,7 @@
  */
 package com.tripod.solr.index;
 
+import com.tripod.api.Field;
 import com.tripod.api.entity.Entity;
 import com.tripod.api.index.IndexException;
 import com.tripod.api.index.Indexer;
@@ -46,6 +47,37 @@ public class SolrIndexer<E extends Entity> implements Indexer<E> {
         try {
             final SolrInputDocument doc = solrIndexTransformer.transform(entity);
             solrClient.add(doc);
+        } catch (Exception e) {
+            throw new IndexException("Unable to index entity due to: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void update(final E entity) throws IndexException {
+            index(entity);
+    }
+
+    @Override
+    public void delete(final E entity) throws IndexException {
+        if (entity == null) {
+            return;
+        }
+
+        delete(entity.getIdField(), entity.getId());
+    }
+
+    @Override
+    public void delete(final Field idField, final String id) throws IndexException {
+        if (idField == null) {
+            throw new IllegalArgumentException("Id field cannot be null");
+        }
+
+        if (id == null) {
+            throw new IllegalArgumentException("Id cannot be null");
+        }
+
+        try {
+            solrClient.deleteByQuery(idField.getName() + ":" + id);
         } catch (Exception e) {
             throw new IndexException("Unable to index entity due to: " + e.getMessage(), e);
         }

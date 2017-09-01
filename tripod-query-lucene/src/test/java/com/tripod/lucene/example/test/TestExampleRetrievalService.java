@@ -16,10 +16,10 @@
  */
 package com.tripod.lucene.example.test;
 
+import com.tripod.api.query.RetrievalQuery;
 import com.tripod.api.query.service.QueryException;
 import com.tripod.lucene.example.Example;
 import com.tripod.lucene.example.query.ExampleRetrievalService;
-import com.tripod.lucene.query.LuceneRetrievalQuery;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +43,7 @@ public class TestExampleRetrievalService extends TestExampleLuceneBase {
 
     @Test
     public void testSimpleRetrieval() throws QueryException, ParseException {
-        LuceneRetrievalQuery query = new LuceneRetrievalQuery("id:1");
+        RetrievalQuery query = new RetrievalQuery("id:1");
         Example result = retrievalService.find(query);
 
         Assert.assertNotNull(result);
@@ -56,7 +56,7 @@ public class TestExampleRetrievalService extends TestExampleLuceneBase {
 
     @Test
     public void testWhenDoesNotExist() throws QueryException, ParseException {
-        LuceneRetrievalQuery query = new LuceneRetrievalQuery("id:ABCD");
+        RetrievalQuery query = new RetrievalQuery("id:ABCD");
         Example result = retrievalService.find(query);
         Assert.assertNull(result);
     }

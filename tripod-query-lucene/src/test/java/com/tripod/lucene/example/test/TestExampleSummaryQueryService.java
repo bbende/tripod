@@ -17,19 +17,18 @@
 package com.tripod.lucene.example.test;
 
 import com.tripod.api.query.FilterQuery;
+import com.tripod.api.query.Query;
 import com.tripod.api.query.Sort;
 import com.tripod.api.query.SortOrder;
 import com.tripod.api.query.result.FacetCount;
 import com.tripod.api.query.result.FacetResult;
 import com.tripod.api.query.result.QueryResults;
 import com.tripod.api.query.service.QueryException;
-import com.tripod.lucene.LuceneField;
+import com.tripod.api.query.service.QueryService;
 import com.tripod.lucene.example.ExampleField;
-import com.tripod.lucene.example.query.ExampleSummary;
+import com.tripod.lucene.example.ExampleSummary;
 import com.tripod.lucene.example.query.ExampleSummaryQueryService;
-import com.tripod.lucene.query.LuceneQuery;
-import com.tripod.lucene.query.LuceneQueryResults;
-import com.tripod.lucene.query.service.LuceneQueryService;
+import com.tripod.lucene.query.LuceneCursorMark;
 import com.tripod.lucene.query.service.SearcherManagerRefresher;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -48,8 +47,10 @@ import org.junit.Test;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -63,7 +64,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
 
-    private LuceneQueryService<LuceneQuery,ExampleSummary> queryService;
+    private QueryService<ExampleSummary> queryService;
 
     @Before
     public void setup() {
@@ -75,7 +76,7 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
      */
     @Test
     public void testSimpleQuery() throws QueryException, ParseException {
-        LuceneQuery query = new LuceneQuery("id:1");
+        Query query = new Query("id:1");
         QueryResults<ExampleSummary> results = queryService.search(query);
 
         assertNotNull(results);
@@ -91,7 +92,7 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
 
     @Test
     public void testReturnFields() throws QueryException {
-        LuceneQuery query = new LuceneQuery("id:1");
+        Query query = new Query("id:1");
         query.setReturnFields(Arrays.asList(ExampleField.ID));
 
         QueryResults<ExampleSummary> results = queryService.search(query);
@@ -109,7 +110,7 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
 
     @Test
     public void testDefaultSearchField() throws QueryException {
-        LuceneQuery query = new LuceneQuery("solr");
+        Query query = new Query("solr");
         QueryResults<ExampleSummary> results = queryService.search(query);
 
         // should search the body field by default and get two results
@@ -123,8 +124,8 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
      */
     @Test
     public void testHighlightAllFields() throws QueryException {
-        LuceneQuery query = new LuceneQuery(ExampleField.BODY.getName() + ":\"Solr is cool\"");
-        query.setHighlightFields(Arrays.asList(LuceneField.ALL_LUCENE_FIELDS));
+        Query query = new Query(ExampleField.BODY.getName() + ":\"Solr is cool\"");
+        query.setHighlightFields(Arrays.asList(com.tripod.api.Field.ALL_FIELDS));
 
         QueryResults<ExampleSummary> results = queryService.search(query);
 
@@ -144,7 +145,7 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
      */
     @Test
     public void testHighlightSpecificFields() throws QueryException {
-        LuceneQuery query = new LuceneQuery(ExampleField.BODY.getName() + ":\"Solr is cool\"");
+        Query query = new Query(ExampleField.BODY.getName() + ":\"Solr is cool\"");
         query.setHighlightFields(Arrays.asList(ExampleField.BODY));
 
         QueryResults<ExampleSummary> results = queryService.search(query);
@@ -163,7 +164,7 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
 
     @Test
     public void testFaceting() throws QueryException {
-        LuceneQuery query = new LuceneQuery("*:*");
+        Query query = new Query("*:*");
         query.setFacetFields(Arrays.asList(ExampleField.COLOR));
 
         QueryResults<ExampleSummary> results = queryService.search(query);
@@ -201,7 +202,7 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
 
         // Now drill down to a specific facet
 
-        LuceneQuery drillDownQuery = new LuceneQuery("*:*");
+        Query drillDownQuery = new Query("*:*");
         drillDownQuery.addFacetField(ExampleField.COLOR);
 
         FilterQuery filterQuery = new FilterQuery(ExampleField.COLOR, "GREEN");
@@ -220,7 +221,7 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
 
     @Test
     public void testSorting() throws QueryException {
-        LuceneQuery query = new LuceneQuery("*:*");
+        Query query = new Query("*:*");
         query.setSorts(Arrays.asList(new Sort(ExampleField.CREATE_DATE, SortOrder.DESC)));
 
         QueryResults<ExampleSummary> results = queryService.search(query);
@@ -237,7 +238,7 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
 
     @Test
     public void testDefaultSorting() throws QueryException {
-        LuceneQuery query = new LuceneQuery(ExampleField.BODY.getName() + ":Solr");
+        Query query = new Query(ExampleField.BODY.getName() + ":Solr");
 
         QueryResults<ExampleSummary> results = queryService.search(query);
 
@@ -254,12 +255,13 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
     public void testPaging() throws QueryException {
         int offset = 0;
         int pageSize = 2;
+        List<ExampleSummary> allResults = new ArrayList<>();
 
         // query 0 to 2
-        LuceneQuery query = new LuceneQuery("*:*", null, pageSize);
-        query.setSorts(Arrays.asList(new Sort(ExampleField.ID, SortOrder.ASC)));
+        Query query = new Query("*:*", offset, pageSize);
+        query.setSorts(Arrays.asList(new Sort(ExampleField.ID, SortOrder.DESC)));
 
-        LuceneQueryResults<ExampleSummary> results = queryService.search(query);
+        QueryResults<ExampleSummary> results = queryService.search(query);
 
         assertNotNull(results);
         assertNotNull(results.getResults());
@@ -267,10 +269,12 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
         assertEquals(5, results.getTotalResults());
         assertEquals(offset, results.getOffset());
         assertEquals(pageSize, results.getPageSize());
+        allResults.addAll(results.getResults());
 
         // query 2 to 4
-        query = new LuceneQuery("*:*", results.getAfterDoc(), pageSize);
-        query.setSorts(Arrays.asList(new Sort(ExampleField.ID, SortOrder.ASC)));
+        offset = offset + pageSize;
+        query = new Query("*:*", offset, pageSize);
+        query.setSorts(Arrays.asList(new Sort(ExampleField.ID, SortOrder.DESC)));
         results = queryService.search(query);
 
         assertNotNull(results);
@@ -279,10 +283,12 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
         assertEquals(5, results.getTotalResults());
         assertEquals(offset, results.getOffset());
         assertEquals(pageSize, results.getPageSize());
+        allResults.addAll(results.getResults());
 
         // query 4 to 6
-        query = new LuceneQuery("*:*", results.getAfterDoc(), pageSize);
-        query.setSorts(Arrays.asList(new Sort(ExampleField.ID, SortOrder.ASC)));
+        offset = offset + pageSize;
+        query = new Query("*:*", offset, pageSize);
+        query.setSorts(Arrays.asList(new Sort(ExampleField.ID, SortOrder.DESC)));
         results = queryService.search(query);
 
         assertNotNull(results);
@@ -291,7 +297,59 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
         assertEquals(5, results.getTotalResults());
         assertEquals(offset, results.getOffset());
         assertEquals(pageSize, results.getPageSize());
+        allResults.addAll(results.getResults());
+
+        assertEquals(5, allResults.size());
+
+        for (int i=0; i < allResults.size(); i++) {
+            ExampleSummary summary = allResults.get(i);
+            assertEquals(String.valueOf(5-i), summary.getId());
+        }
     }
+
+    @Test
+    public void testPagingWithCursorMark() throws QueryException {
+        int pageSize = 2;
+        String cursorMark = LuceneCursorMark.START;
+
+        boolean done = false;
+        List<String> ids = new ArrayList<>();
+
+        // page through until the returned cursorMark is equal to the previous cursorMark
+
+        while (!done) {
+            // required to include a sort on the uniqueKey field to use cursorMark
+            Query query = new Query("*:*", cursorMark, pageSize);
+            query.addSort(ExampleField.CREATE_DATE, SortOrder.DESC);
+            query.addSort(ExampleField.ID, SortOrder.ASC);
+
+            QueryResults<ExampleSummary> results = queryService.search(query);
+
+            assertNotNull(results);
+            assertNotNull(results.getResults());
+            assertTrue(results.getResults().size() <= pageSize);
+            assertEquals(5, results.getTotalResults());
+            assertEquals(0, results.getOffset());
+            assertEquals(pageSize, results.getPageSize());
+            assertNotNull(results.getCursorMark());
+
+            results.getResults().stream().forEach(r -> ids.add(r.getId()));
+
+            if (results.getCursorMark().equals(cursorMark)) {
+                done = true;
+            }
+
+            cursorMark = results.getCursorMark();
+        }
+
+        // verify we got ids 1-5 in order
+        assertEquals(5, ids.size());
+        for (int i=0; i < 5; i++) {
+            assertEquals(String.valueOf(5-i), ids.get(i));
+        }
+
+    }
+
 
     @Test
     public void testRefreshingSearcherManager() throws IOException, ParseException, QueryException, InterruptedException {
@@ -317,7 +375,7 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
         }
 
         // Query for the new document and shouldn't get it
-        LuceneQuery query = new LuceneQuery("id:99");
+        Query query = new Query("id:99");
         QueryResults<ExampleSummary> results = queryService.search(query);
 
         assertNotNull(results);
@@ -332,7 +390,7 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
             Thread.sleep(3000);
 
             // Query again should get a result now
-            query = new LuceneQuery("id:99");
+            query = new Query("id:99");
             results = queryService.search(query);
 
             assertNotNull(results);

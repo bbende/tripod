@@ -16,6 +16,7 @@
  */
 package com.tripod.lucene.query;
 
+import com.tripod.api.query.Query;
 import com.tripod.api.query.QueryTransformException;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.facet.DrillDownQuery;
@@ -28,7 +29,7 @@ import org.apache.lucene.queryparser.classic.QueryParser;
  *
  * @author bbende
  */
-public class StandardLuceneQueryTransformer<Q extends LuceneQuery> implements LuceneQueryTransformer<Q> {
+public class StandardLuceneQueryTransformer implements LuceneQueryTransformer {
 
     private final String defaultField;
     private final Analyzer analyzer;
@@ -45,7 +46,7 @@ public class StandardLuceneQueryTransformer<Q extends LuceneQuery> implements Lu
     }
 
     @Override
-    public org.apache.lucene.search.Query transform(Q input) throws QueryTransformException {
+    public org.apache.lucene.search.Query transform(final Query input) throws QueryTransformException {
         try {
             org.apache.lucene.search.Query luceneQuery = new QueryParser(defaultField, analyzer).parse(input.getQuery());
 

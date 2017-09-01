@@ -68,12 +68,12 @@ Creates an abstraction layer between the application and the underlying search p
     
 3) Create a domain object that extends QueryResult:
 
-        public class Foo extends QueryResult<String> {
+        public class Foo extends AbstractQueryResult {
 
           private String title;
 
-          public Foo(String s) {
-              super(s);
+          public Foo(String id) {
+              super(Foo.ID, id);
           }
           public String getTitle() {
               return title;
@@ -99,16 +99,16 @@ Creates an abstraction layer between the application and the underlying search p
     
 5) Create a query service that extends SolrQueryService and uses the transformer above:
 
-        public class FooQueryService extends SolrQueryService<Query,Foo> {
+        public class FooQueryService extends SolrQueryService<Foo> {
             public FooQueryService(SolrClient solrClient) {
-                super(solrClient, new StandardSolrQueryTransformer<>(), new FooTransformer());
+                super(solrClient, new StandardSolrQueryTransformer(), new FooTransformer());
             }
         }
 
 6) Initialize the query service with the appropriate SolrClient and perform queries:
 
         SolrClient solrClient = ...
-        QueryService<Query,Foo> queryService = new FooQueryService(solrClient);
+        QueryService<Foo> queryService = new FooQueryService(solrClient);
 
         Query query = new Query("id:1");
         QueryResults<Foo> results = queryService.search(query);
@@ -130,35 +130,48 @@ NOTE: Lucene support is not part of the Tripod 0.1.0 release.
     
 2) Create an enumeration that defines the available fields and implements the Field interface:
 
-        public enum FooField implements LuceneField {
-            ID("id", SortField.Type.STRING),
-            TITLE("title", SortField.Type.STRING),
+        public enum FooField implements Field {
+            ID("id"),
+            TITLE("title"),
 
             private String fieldName;
-            private SortField.Type sortType;
 
-            ExampleField(String fieldName, SortField.Type sortType) {
+            ExampleField(String fieldName) {
                 this.fieldName = fieldName;
-                this.sortType = sortType;
             }
             @Override
             public String getName() {
                 return fieldName;
             }
-            @Override
-            public SortField.Type getSortType() {
-                return sortType;
-            }
         }
+
+3) Create a SortTypeFactory that defines the sort type for each of the above fields:
+
+        public class FooFieldSortTypeFactory implements SortTypeFactory {
+        
+            private static final Map<FooField,SortField.Type> SORT_FIELD_TYPES = new HashMap<>();
+        
+            static {
+                SORT_FIELD_TYPES.put(ExampleField.ID, SortField.Type.STRING);
+                SORT_FIELD_TYPES.put(ExampleField.TITLE, SortField.Type.STRING);
+             }
+        
+            @Override
+            public SortField.Type getSortType(final Field f) {
+                return SORT_FIELD_TYPES.get(f);
+            }
+        
+        }
+    
     
 3) Create a domain object that extends QueryResult:
 
-        public class Foo extends QueryResult<String> {
+        public class Foo extends AbstractQueryResult {
 
             private String title;
 
-            public Foo(String s) {
-                super(s);
+            public Foo(String id) {
+                super(FooField.ID, id);
             }
             public String getTitle() {
                 return title;
@@ -185,9 +198,10 @@ NOTE: Lucene support is not part of the Tripod 0.1.0 release.
 5) Create a query service that extends LuceneQueryService and uses the transformer above:
 
         public FooQueryService(final SearcherManager searcherManager, final String defaultField, 
-                                final Analyzer analyzer, final FacetsConfig facetsConfig) {
+                               final Analyzer analyzer, final FacetsConfig facetsConfig) 
+                               extends LuceneQueryService<Foo> {
                 super(searcherManager, analyzer,
-                        new StandardLuceneQueryTransformer<>(defaultField, analyzer, facetsConfig),
+                        new StandardLuceneQueryTransformer(defaultField, analyzer, facetsConfig),
                         new FooTransformer());
             }
 
@@ -196,18 +210,19 @@ NOTE: Lucene support is not part of the Tripod 0.1.0 release.
         String defaultField = ...
         Analyzer analyzer = ...
         SearcherManager searcherManager =...
+        FacetsConfig facetsConfig = ...
 
-        LuceneQueryService<LuceneQuery,Foo> queryService = new FooQueryService(searcherManager, defaultField, analyzer);
+        QueryService<Foo> queryService = new FooQueryService(searcherManager, defaultField, analyzer, facetsConfig);
 
-        LuceneQuery query = new LuceneQuery("id:1");
-        LuceneQueryResults<Foo> results = queryService.search(query);
+        Query query = new Query("id:1");
+        QueryResults<Foo> results = queryService.search(query);
     
     
 For additional information see the example in [tripod-query-lucene/src/test/java](https://github.com/bbende/tripod/tree/master/tripod-query-lucene/src/test/java/com/tripod/lucene/example).
 
 # Release Instructions
 
-    mvn release:prepare -DdryRun=true -Pfull
+    mvn release:prepare -DdryRun=true -Pfull,sign
     mvn release:clean
     mvn release:prepare -Pfull
     mvn release:perform -Pfull

@@ -16,6 +16,7 @@
  */
 package com.tripod.lucene.index;
 
+import com.tripod.api.Field;
 import com.tripod.api.TransformException;
 import com.tripod.api.entity.Entity;
 import com.tripod.api.index.IndexException;
@@ -24,6 +25,7 @@ import org.apache.commons.lang.Validate;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.Term;
 
 import java.io.IOException;
 
@@ -60,14 +62,64 @@ public class LuceneIndexer<E extends Entity> implements Indexer<E> {
         }
 
         try {
-            final Document doc = indexTransformer.transform(entity);
-            if (facetsConfig == null) {
-                indexWriter.addDocument(doc);
-            } else {
-                indexWriter.addDocument(facetsConfig.build(doc));
+            Document doc = indexTransformer.transform(entity);
+            if (facetsConfig != null) {
+                doc = facetsConfig.build(doc);
             }
+
+            indexWriter.addDocument(doc);
+
         } catch (IOException | TransformException e) {
             throw new IndexException("Unable to index entity due to: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void update(final E entity) throws IndexException {
+        if (entity == null) {
+            return;
+        }
+
+        // delete the existing document by id
+        final Term idTerm = new Term(entity.getIdField().getName(), entity.getId());
+
+        try {
+            Document updatedDoc = indexTransformer.transform(entity);
+            if (facetsConfig != null) {
+                updatedDoc = facetsConfig.build(updatedDoc);
+            }
+
+            indexWriter.updateDocument(idTerm, updatedDoc);
+
+        } catch (TransformException | IOException e) {
+            throw new IndexException("Unable to update entity due to: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void delete(E entity) throws IndexException {
+        if (entity == null) {
+            return;
+        }
+
+        delete(entity.getIdField(), entity.getId());
+    }
+
+    @Override
+    public void delete(Field idField, String id) throws IndexException {
+        if (idField == null) {
+            throw new IllegalArgumentException("Id field cannot be null");
+        }
+
+        if (id == null) {
+            throw new IllegalArgumentException("Id cannot be null");
+        }
+
+        try {
+            final Term idTerm = new Term(idField.getName(), id);
+            indexWriter.deleteDocuments(idTerm);
+        } catch (IOException e) {
+            throw new IndexException("Unable to update entity due to: " + e.getMessage(), e);
         }
     }
 

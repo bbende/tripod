@@ -16,7 +16,8 @@
  */
 package com.tripod.lucene.example.query;
 
-import com.tripod.lucene.query.LuceneQuery;
+import com.tripod.lucene.example.ExampleFieldSortTypeFactory;
+import com.tripod.lucene.example.ExampleSummary;
 import com.tripod.lucene.query.StandardLuceneQueryTransformer;
 import com.tripod.lucene.query.service.LuceneQueryService;
 import org.apache.lucene.analysis.Analyzer;
@@ -28,15 +29,16 @@ import org.apache.lucene.search.SearcherManager;
  *
  * @author bbende
  */
-public class ExampleSummaryQueryService extends LuceneQueryService<LuceneQuery,ExampleSummary> {
+public class ExampleSummaryQueryService extends LuceneQueryService<ExampleSummary> {
 
     public ExampleSummaryQueryService(final SearcherManager searcherManager,
                                       final String defaultField,
                                       final Analyzer analyzer,
                                       final FacetsConfig facetsConfig) {
         super(searcherManager, analyzer,
-                new StandardLuceneQueryTransformer<>(defaultField, analyzer, facetsConfig),
-                new ExampleSummaryTransformer());
+                new StandardLuceneQueryTransformer(defaultField, analyzer, facetsConfig),
+                new ExampleSummaryTransformer(),
+                new ExampleFieldSortTypeFactory());
     }
 
 }

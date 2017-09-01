@@ -16,11 +16,12 @@
  */
 package com.tripod.lucene.query.service;
 
+import com.tripod.api.query.Query;
 import com.tripod.api.query.result.QueryResult;
+import com.tripod.api.query.result.QueryResults;
 import com.tripod.api.query.service.QueryException;
 import com.tripod.api.query.service.QueryService;
-import com.tripod.lucene.query.LuceneQuery;
-import com.tripod.lucene.query.LuceneQueryResults;
+import com.tripod.lucene.SortTypeFactory;
 import com.tripod.lucene.query.LuceneQueryTransformer;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.search.SearcherManager;
@@ -32,18 +33,27 @@ import org.apache.lucene.search.SearcherManager;
  *
  * @author bbende
  */
-public class LuceneQueryService<Q extends LuceneQuery, QR extends QueryResult> extends LuceneService<Q,QR>
-        implements QueryService<Q,QR> {
+public class LuceneQueryService<QR extends QueryResult> extends LuceneService<QR> implements QueryService<QR> {
 
     public LuceneQueryService(final SearcherManager searcherManager,
                               final Analyzer analyzer,
-                              final LuceneQueryTransformer<Q> queryTransformer,
-                              final LuceneDocumentTransformer<QR> documentTransformer) {
-        super(searcherManager, analyzer, queryTransformer, documentTransformer);
+                              final LuceneQueryTransformer queryTransformer,
+                              final LuceneDocumentTransformer<QR> documentTransformer,
+                              final SortTypeFactory sortTypeFactory) {
+        super(searcherManager, analyzer, queryTransformer, documentTransformer, sortTypeFactory);
+    }
+
+    public LuceneQueryService(final SearcherManager searcherManager,
+                              final Analyzer analyzer,
+                              final LuceneQueryTransformer queryTransformer,
+                              final LuceneDocumentTransformer<QR> documentTransformer,
+                              final SortTypeFactory sortTypeFactory,
+                              final Integer maxSearchResults) {
+        super(searcherManager, analyzer, queryTransformer, documentTransformer, sortTypeFactory, maxSearchResults);
     }
 
     @Override
-    public LuceneQueryResults<QR> search(Q query) throws QueryException {
+    public QueryResults<QR> search(final Query query) throws QueryException {
         return performSearch(query);
     }
 

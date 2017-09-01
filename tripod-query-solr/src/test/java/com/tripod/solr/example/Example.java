@@ -16,7 +16,7 @@
  */
 package com.tripod.solr.example;
 
-import com.tripod.api.query.result.QueryResult;
+import com.tripod.api.entity.AbstractEntity;
 
 import java.util.Date;
 
@@ -25,15 +25,15 @@ import java.util.Date;
  *
  * @author bbende
  */
-public class Example extends QueryResult<String> {
+public class Example extends AbstractEntity {
 
     private String title;
     private String body;
     private String color;
     private Date createDate;
 
-    public Example(String s) {
-        super(s);
+    public Example(String id) {
+        super(ExampleField.ID, id);
     }
 
     public String getTitle() {

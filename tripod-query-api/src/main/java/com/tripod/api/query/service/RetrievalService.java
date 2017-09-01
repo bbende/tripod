@@ -16,15 +16,15 @@
  */
 package com.tripod.api.query.service;
 
-import com.tripod.api.query.Query;
-import com.tripod.api.query.result.QueryResult;
+import com.tripod.api.entity.Entity;
+import com.tripod.api.query.RetrievalQuery;
 
 /**
- * A service used to retrieve a single result.
+ * A service used to retrieve a single entity.
  *
  * @author bbende
  */
-public interface RetrievalService<Q extends Query, QR extends QueryResult> {
+public interface RetrievalService<E extends Entity> {
 
     /**
      * Performs a query that is expected to return a single result.
@@ -33,6 +33,6 @@ public interface RetrievalService<Q extends Query, QR extends QueryResult> {
      * @return the result of the query
      * @throws QueryException if an error occurs or if more than one result is found
      */
-    QR find(final Q query) throws QueryException;
+    E find(final RetrievalQuery query) throws QueryException;
 
 }

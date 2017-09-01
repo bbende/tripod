@@ -14,16 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.lucene.query;
+package com.tripod.api.entity;
+
+import com.tripod.api.Field;
+import org.apache.commons.lang.Validate;
 
 /**
- * A RetrievalQuery for LuceneRetrievalService implementations.
+ * Base class for entities.
  *
  * @author bbende
  */
-public class LuceneRetrievalQuery extends LuceneQuery {
+public abstract class AbstractEntity implements Entity {
 
-    public LuceneRetrievalQuery(final String query) {
-        super(query, null, 1);
+    private final String id;
+    private final Field idField;
+
+    public AbstractEntity(final Field idField, final String id) {
+        this.id = id;
+        this.idField = idField;
+        Validate.notNull(id);
+        Validate.notNull(idField);
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public Field getIdField() {
+        return idField;
     }
 }

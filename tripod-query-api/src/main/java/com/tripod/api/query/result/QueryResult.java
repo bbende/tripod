@@ -21,26 +21,14 @@ import com.tripod.api.entity.Entity;
 import java.util.List;
 
 /**
- * Base class for all QueryResults.
- *
- * @param <ID> the type of id for this result
+ * An Entity that is the result of executing a query.
  *
  * @author bbende
  */
-public class QueryResult<ID> extends Entity<ID> {
+public interface QueryResult extends Entity {
 
-    private List<Highlight> highlights;
+    List<Highlight> getHighlights();
 
-    public QueryResult(final ID id) {
-        super(id);
-    }
-
-    public List<Highlight> getHighlights() {
-        return highlights;
-    }
-
-    public void setHighlights(List<Highlight> highlights) {
-        this.highlights = highlights;
-    }
+    void setHighlights(List<Highlight> highlights);
 
 }

@@ -16,6 +16,7 @@
  */
 package com.tripod.api.index;
 
+import com.tripod.api.Field;
 import com.tripod.api.entity.Entity;
 
 /**
@@ -32,6 +33,31 @@ public interface Indexer<E extends Entity> {
      * @throws IndexException if an error occurs while adding the entity to the index
      */
     void index(E entity) throws IndexException;
+
+    /**
+     * Updates the given entity by reindexing all fields of the given entity.
+     *
+     * @param entity the entity to update
+     * @throws IndexException if an error occurs while updating the index
+     */
+    void update(E entity) throws IndexException;
+
+    /**
+     * Deletes the given entity from the index.
+     *
+     * @param entity the entity to delete
+     * @throws IndexException if an error occurs deleting the entity from the index
+     */
+    void delete(E entity) throws IndexException;
+
+    /**
+     * Deletes documents with the given id field, where the id field is equal to the given id.
+     *
+     * @param idField the id field
+     * @param id the value of the id field
+     * @throws IndexException if an error occurs deleting from the index
+     */
+    void delete(Field idField, String id) throws IndexException;
 
     /**
      * Commits any changes to the index.

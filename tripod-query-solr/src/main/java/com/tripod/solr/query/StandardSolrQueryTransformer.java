@@ -16,25 +16,31 @@
  */
 package com.tripod.solr.query;
 
-import com.tripod.api.Field;
 import com.tripod.api.query.Query;
 import com.tripod.api.query.Sort;
 import com.tripod.api.query.SortOrder;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.common.params.CursorMarkParams;
 
 /**
  * Standard factory for creating SolrQuery instances from the given Query.
  *
  * @author bbende
  */
-public class StandardSolrQueryTransformer<Q extends Query<Field>> implements SolrQueryTransformer<Q> {
+public class StandardSolrQueryTransformer implements SolrQueryTransformer {
 
     @Override
-    public SolrQuery transform(final Q query) {
+    public SolrQuery transform(final Query query) {
         final SolrQuery solrQuery = new SolrQuery(query.getQuery());
-        solrQuery.setStart(query.getOffset());
-        solrQuery.setRows(query.getRows());
         solrQuery.setParam("q.op", query.getDefaultOperator().name());
+
+        if (query.getCursorMark() != null) {
+            solrQuery.setParam(CursorMarkParams.CURSOR_MARK_PARAM, query.getCursorMark());
+        } else {
+            solrQuery.setStart(query.getOffset());
+        }
+
+        solrQuery.setRows(query.getRows());
 
         if (query.getReturnFields() != null) {
             query.getReturnFields().stream().forEach(f -> solrQuery.addField(f.getName()));

@@ -17,6 +17,7 @@
 package com.tripod.solr.example.query;
 
 import com.tripod.solr.example.ExampleField;
+import com.tripod.solr.example.ExampleSummary;
 import com.tripod.solr.query.service.SolrDocumentTransformer;
 import org.apache.solr.common.SolrDocument;
 

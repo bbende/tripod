@@ -14,35 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.query;
+package com.tripod.lucene.example;
 
 import com.tripod.api.Field;
-import org.apache.commons.lang.Validate;
+import com.tripod.lucene.SortTypeFactory;
+import org.apache.lucene.search.SortField;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * A standard filter query consisting of a field to filter on and a value.
+ * SortTypeFactory for ExampleField.
  *
  * @author bbende
  */
-public class FilterQuery {
+public class ExampleFieldSortTypeFactory implements SortTypeFactory {
 
-    private final Field field;
+    private static final Map<ExampleField,SortField.Type> SORT_FIELD_TYPES = new HashMap<>();
 
-    private final String value;
-
-    public FilterQuery(final Field field, final String value) {
-        this.field = field;
-        this.value = value;
-        Validate.notNull(field);
-        Validate.notNull(value);
+    static {
+        SORT_FIELD_TYPES.put(ExampleField.ID, SortField.Type.STRING);
+        SORT_FIELD_TYPES.put(ExampleField.TITLE, SortField.Type.STRING);
+        SORT_FIELD_TYPES.put(ExampleField.BODY, SortField.Type.STRING);
+        SORT_FIELD_TYPES.put(ExampleField.COLOR, SortField.Type.STRING);
+        SORT_FIELD_TYPES.put(ExampleField.CREATE_DATE, SortField.Type.LONG);
     }
 
-    public Field getField() {
-        return field;
-    }
-
-    public String getValue() {
-        return value;
+    @Override
+    public SortField.Type getSortType(final Field f) {
+        return SORT_FIELD_TYPES.get(f);
     }
 
 }

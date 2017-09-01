@@ -24,20 +24,20 @@ import org.apache.commons.lang.Validate;
  *
  * @author bbende
  */
-public class Sort<F extends Field> {
+public class Sort {
 
-    private final F field;
+    private final Field field;
 
     private final SortOrder sortOrder;
 
-    public Sort(F field, SortOrder sortOrder) {
+    public Sort(Field field, SortOrder sortOrder) {
         this.field = field;
         this.sortOrder = sortOrder;
         Validate.notNull(this.field);
         Validate.notNull(this.sortOrder);
     }
 
-    public F getField() {
+    public Field getField() {
         return field;
     }
 

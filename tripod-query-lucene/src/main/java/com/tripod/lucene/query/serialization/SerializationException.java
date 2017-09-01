@@ -14,27 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.api.entity;
-
-import com.tripod.api.Field;
+package com.tripod.lucene.query.serialization;
 
 /**
- * Represents an entity that may be indexed and/or searched.
- *
- * All entities must have an id field of type string.
+ * An error during serialization.
  *
  * @author bbende
  */
-public interface Entity {
+public class SerializationException extends RuntimeException {
 
-    /**
-     * @return the id of this entity
-     */
-    String getId();
+    public SerializationException(String message) {
+        super(message);
+    }
 
-    /**
-     * @return the id field in the index for this entity
-     */
-    Field getIdField();
-
+    public SerializationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

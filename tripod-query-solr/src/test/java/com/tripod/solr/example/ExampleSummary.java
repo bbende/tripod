@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.lucene.example.query;
+package com.tripod.solr.example;
 
-import com.tripod.api.query.result.QueryResult;
+import com.tripod.api.query.result.AbstractQueryResult;
 
 import java.util.Date;
 
@@ -27,14 +27,14 @@ import java.util.Date;
  *
  * @author bbende
  */
-public class ExampleSummary extends QueryResult<String> {
+public class ExampleSummary extends AbstractQueryResult {
 
     private String title;
     private String color;
     private Date createDate;
 
-    public ExampleSummary(String s) {
-        super(s);
+    public ExampleSummary(String id) {
+        super(ExampleField.ID, id);
     }
 
     public String getTitle() {

@@ -18,6 +18,7 @@ package com.tripod.solr.example.test;
 
 import com.tripod.api.query.RetrievalQuery;
 import com.tripod.api.query.service.QueryException;
+import com.tripod.api.query.service.RetrievalService;
 import com.tripod.solr.example.Example;
 import com.tripod.solr.example.query.ExampleRetrievalService;
 import org.junit.Assert;
@@ -34,7 +35,7 @@ import java.text.SimpleDateFormat;
  */
 public class TestExampleRetrievalService extends TestExampleBase {
 
-    private ExampleRetrievalService retrievalService;
+    private RetrievalService<Example> retrievalService;
 
     @Before
     public void setup() {

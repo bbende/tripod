@@ -16,7 +16,7 @@
  */
 package com.tripod.solr.example.query;
 
-import com.tripod.api.query.Query;
+import com.tripod.solr.example.ExampleSummary;
 import com.tripod.solr.query.StandardSolrQueryTransformer;
 import com.tripod.solr.query.service.SolrQueryService;
 import org.apache.solr.client.solrj.SolrClient;
@@ -26,10 +26,12 @@ import org.apache.solr.client.solrj.SolrClient;
  *
  * @author bbende
  */
-public class ExampleSummaryQueryService extends SolrQueryService<Query,ExampleSummary> {
+public class ExampleSummaryQueryService extends SolrQueryService<ExampleSummary> {
 
     public ExampleSummaryQueryService(SolrClient solrClient) {
-        super(solrClient, new StandardSolrQueryTransformer<>(), new ExampleSummaryTransformer());
+        super(solrClient,
+                new StandardSolrQueryTransformer(),
+                new ExampleSummaryTransformer());
     }
 
 }

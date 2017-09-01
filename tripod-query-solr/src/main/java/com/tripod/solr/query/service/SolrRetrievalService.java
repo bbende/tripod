@@ -16,40 +16,91 @@
  */
 package com.tripod.solr.query.service;
 
+import com.tripod.api.TransformException;
+import com.tripod.api.entity.Entity;
 import com.tripod.api.query.RetrievalQuery;
-import com.tripod.api.query.result.QueryResult;
-import com.tripod.api.query.result.QueryResults;
 import com.tripod.api.query.service.QueryException;
 import com.tripod.api.query.service.RetrievalService;
 import com.tripod.solr.query.SolrQueryTransformer;
+import org.apache.commons.lang.Validate;
 import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Solr implementation of RetrievalService.
  *
  * @author bbende
  */
-public class SolrRetrievalService<Q extends RetrievalQuery, QR extends QueryResult> extends SolrService<Q,QR>
-    implements RetrievalService<Q,QR> {
+public class SolrRetrievalService<E extends Entity> implements RetrievalService<E> {
+
+    static final Logger LOGGER = LoggerFactory.getLogger(SolrRetrievalService.class);
+
+    protected final SolrClient solrClient;
+    protected final SolrQueryTransformer queryTransformer;
+    protected final SolrDocumentTransformer<E> documentTransformer;
 
     public SolrRetrievalService(final SolrClient solrClient,
-                                final SolrQueryTransformer<Q> queryFactory,
-                                final SolrDocumentTransformer<QR> solrDocumentTransformer) {
-        super(solrClient, queryFactory, solrDocumentTransformer);
+                                final SolrQueryTransformer queryTransformer,
+                                final SolrDocumentTransformer<E> documentTransformer) {
+        this.solrClient = solrClient;
+        this.queryTransformer = queryTransformer;
+        this.documentTransformer = documentTransformer;
+        Validate.notNull(this.solrClient);
+        Validate.notNull(this.queryTransformer);
+        Validate.notNull(this.documentTransformer);
     }
 
     @Override
-    public QR find(Q query) throws QueryException {
-        QueryResults<QR> results = performSearch(query);
-        if (results.getResults().size() > 1) {
+    public E find(final RetrievalQuery query) throws QueryException {
+        final List<E> results = performSearch(query);
+        if (results.size() > 1) {
             throw new QueryException("RetrievalQuery returned more than one result");
         }
 
-        if (results.getResults().size() == 0) {
+        if (results.size() == 0) {
             return null;
         } else {
-            return results.getResults().get(0);
+            return results.get(0);
         }
     }
 
+    protected List<E> performSearch(final RetrievalQuery query) throws QueryException {
+        try {
+            // Convert from Query API to SolrQuery
+            final SolrQuery solrQuery = queryTransformer.transform(query);
+
+            // Perform the actual Solr query
+            long startTime = System.currentTimeMillis();
+            final QueryResponse response = solrClient.query(solrQuery);
+            LOGGER.debug("Query executed in " + (System.currentTimeMillis() - startTime));
+
+            // Transform each Solr doc to an Entity
+            final List<E> results = new ArrayList<>();
+            for (SolrDocument solrDoc : response.getResults()) {
+                final E result = documentTransformer.transform(solrDoc);
+                if (result != null) {
+                    results.add(result);
+                }
+            }
+            return  results;
+
+        } catch (SolrServerException e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new QueryException("An unexpected error occurred performing the search operation", e);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new QueryException("An unexpected error occurred communicating with the query service", e);
+        } catch (TransformException e) {
+            throw new QueryException("A transform error occurred", e);
+        }
+    }
 }

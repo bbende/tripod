@@ -29,7 +29,7 @@ import java.util.Map;
  *
  * @author bbende
  */
-public class Query<F extends Field> {
+public class Query {
 
     public static final String QUERY_ALL = "*:*";
 
@@ -39,27 +39,41 @@ public class Query<F extends Field> {
     private final String query;
     private final Integer offset;
     private final Integer rows;
+    private final String cursorMark;
 
-    private List<F> returnFields;
-    private List<F> highlightFields;
-    private List<F> facetFields;
+    private List<Field> returnFields;
+    private List<Field> highlightFields;
+    private List<Field> facetFields;
 
-    private List<FilterQuery<F>> filterQueries;
-    private List<Sort<F>> sorts;
+    private List<FilterQuery> filterQueries;
+    private List<Sort> sorts;
 
     private Map<String,String> params = new HashMap<>();
 
     private Operator defaultOperator = Operator.AND;
     private RequestMethod requestMethod = RequestMethod.GET;
 
+    /**
+     * Constructs a Query with offset 0 and page size of 10.
+     *
+     * @param query the query string
+     */
     public Query(final String query) {
         this(query, DEFAULT_OFFSET, DEFAULT_PAGE_SIZE);
     }
 
+    /**
+     * Constructs a query starting from the given offset.
+     *
+     * @param query the query string
+     * @param offset the offset to start at
+     * @param rows the number of rows to retrieve
+     */
     public Query(final String query, final Integer offset, final Integer rows) {
         this.query = query;
         this.offset = offset;
         this.rows = rows;
+        this.cursorMark = null;
 
         Validate.notEmpty(query);
         Validate.notNull(offset);
@@ -67,6 +81,26 @@ public class Query<F extends Field> {
         Validate.notNull(rows);
         Validate.isTrue(rows > 0);
     }
+
+    /**
+     * Constructs a query starting from the given cursorMark.
+     *
+     * @param query the query string
+     * @param cursorMark the cursorMark to start at
+     * @param rows the number of rows to retrieve
+     */
+    public Query(final String query, final String cursorMark, final Integer rows) {
+        this.query = query;
+        this.offset = 0;
+        this.rows = rows;
+        this.cursorMark = cursorMark;
+
+        Validate.notEmpty(query);
+        Validate.notEmpty(cursorMark);
+        Validate.notNull(rows);
+        Validate.isTrue(rows > 0);
+    }
+
 
     public String getQuery() {
         return query;
@@ -80,58 +114,76 @@ public class Query<F extends Field> {
         return rows;
     }
 
-    public List<F> getReturnFields() {
+    public String getCursorMark() {
+        return cursorMark;
+    }
+
+    public List<Field> getReturnFields() {
         return returnFields;
     }
 
-    public void setReturnFields(List<F> returnFields) {
+    public void setReturnFields(List<Field> returnFields) {
         this.returnFields = returnFields;
     }
 
-    public List<F> getHighlightFields() {
+    public List<Field> getHighlightFields() {
         return highlightFields;
     }
 
-    public void setHighlightFields(List<F> highlightFields) {
+    public void setHighlightFields(List<Field> highlightFields) {
         this.highlightFields = highlightFields;
     }
 
-    public List<F> getFacetFields() {
+    public List<Field> getFacetFields() {
         return facetFields;
     }
 
-    public void setFacetFields(List<F> facetFields) {
+    public void setFacetFields(List<Field> facetFields) {
         this.facetFields = facetFields;
     }
 
-    public void addFacetField(F field) {
+    public void addFacetField(Field field) {
         if (this.facetFields == null) {
             this.facetFields = new ArrayList<>();
         }
         this.facetFields.add(field);
     }
 
-    public List<FilterQuery<F>> getFilterQueries() {
+    public List<FilterQuery> getFilterQueries() {
         return filterQueries;
     }
 
-    public void setFilterQueries(List<FilterQuery<F>> filterQueries) {
+    public void setFilterQueries(List<FilterQuery> filterQueries) {
         this.filterQueries = filterQueries;
     }
 
-    public void addFilterQuery(FilterQuery<F> fq) {
+    public void addFilterQuery(FilterQuery fq) {
         if (this.filterQueries == null) {
             this.filterQueries = new ArrayList<>();
         }
         this.filterQueries.add(fq);
     }
 
-    public List<Sort<F>> getSorts() {
+    public List<Sort> getSorts() {
         return sorts;
     }
 
-    public void setSorts(List<Sort<F>> sorts) {
+    public void setSorts(List<Sort> sorts) {
         this.sorts = sorts;
+    }
+
+    public void addSort(Sort sort) {
+        if (this.sorts == null) {
+            this.sorts = new ArrayList<>();
+        }
+        this.sorts.add(sort);
+    }
+
+    public void addSort(Field sortField, SortOrder order) {
+        if (this.sorts == null) {
+            this.sorts = new ArrayList<>();
+        }
+        this.sorts.add(new Sort(sortField, order));
     }
 
     public Operator getDefaultOperator() {

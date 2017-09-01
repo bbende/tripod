@@ -14,42 +14,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.solr.example.query;
+package com.tripod.lucene.example;
 
-import com.tripod.api.query.Query;
-import com.tripod.solr.example.ExampleField;
+import com.tripod.api.query.result.AbstractQueryResult;
 
-import java.util.Arrays;
+import java.util.Date;
 
 /**
- * Example of extending Query to define common parameters for a type of query.
+ * Example QueryResult implementation for search result summary.
+ *
+ * This class would act as the "search result".
  *
  * @author bbende
  */
-public class ExampleSummaryQuery extends Query {
+public class ExampleSummary extends AbstractQueryResult {
 
-    public ExampleSummaryQuery(String query) {
-        super(query);
-        init();
+    private String title;
+    private String color;
+    private Date createDate;
+
+    public ExampleSummary(String s) {
+        super(ExampleField.ID, s);
     }
 
-    public ExampleSummaryQuery(String query, Integer offset, Integer rows) {
-        super(query, offset, rows);
-        init();
+    public String getTitle() {
+        return title;
     }
 
-    public ExampleSummaryQuery(String query, String cursorMark, Integer rows) {
-        super(query, cursorMark, rows);
-        init();
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    private void init() {
-        setReturnFields(Arrays.asList(
-                ExampleField.ID,
-                ExampleField.TITLE,
-                ExampleField.COLOR,
-                ExampleField.CREATE_DATE
-        ));
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
     }
 
 }

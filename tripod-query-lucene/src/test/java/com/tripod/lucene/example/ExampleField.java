@@ -16,38 +16,30 @@
  */
 package com.tripod.lucene.example;
 
-import com.tripod.lucene.LuceneField;
-import org.apache.lucene.search.SortField;
+import com.tripod.api.Field;
 
 /**
  * Example field implementation.
  *
  * @author bbende
  */
-public enum ExampleField implements LuceneField {
+public enum ExampleField implements Field {
 
-    ID("id", SortField.Type.STRING),
-    TITLE("title", SortField.Type.STRING),
-    BODY("body", SortField.Type.STRING),
-    COLOR("color", SortField.Type.STRING),
-    CREATE_DATE("create_date", SortField.Type.LONG);
+    ID("id"),
+    TITLE("title"),
+    BODY("body"),
+    COLOR("color"),
+    CREATE_DATE("create_date");
 
     private String fieldName;
-    private SortField.Type sortType;
 
-    ExampleField(String fieldName, SortField.Type sortType) {
+    ExampleField(String fieldName) {
         this.fieldName = fieldName;
-        this.sortType = sortType;
     }
 
     @Override
     public String getName() {
         return fieldName;
-    }
-
-    @Override
-    public SortField.Type getSortType() {
-        return sortType;
     }
 
 }

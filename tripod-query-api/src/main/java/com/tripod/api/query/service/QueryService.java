@@ -25,7 +25,7 @@ import com.tripod.api.query.result.QueryResults;
  *
  * @author bbende
  */
-public interface QueryService<Q extends Query, QR extends QueryResult> {
+public interface QueryService<QR extends QueryResult> {
 
     /**
      * Performs the given query.
@@ -34,6 +34,6 @@ public interface QueryService<Q extends Query, QR extends QueryResult> {
      * @return the results of the query
      * @throws QueryException if an error occurs performing the query
      */
-    QueryResults<QR> search(final Q query) throws QueryException;
+    QueryResults<QR> search(final Query query) throws QueryException;
 
 }

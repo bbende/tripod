@@ -14,33 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.lucene;
+package com.tripod.lucene.query.serialization;
 
-import com.tripod.api.Field;
-import org.apache.lucene.search.SortField;
+import org.apache.lucene.search.FieldDoc;
 
 /**
- * Extension of Field for Lucene specific functionality.
+ * Converts between a FieldDoc and it's byte representation.
  *
  * @author bbende
  */
-public interface LuceneField extends Field {
+public interface FieldDocSerializer {
 
     /**
-     * All fields for LuceneField type.
+     * Serializes a FieldDoc into a byte array.
+     *
+     * @param doc the doc to serialize
+     * @return the serialized bytes of the doc
      */
-    LuceneField ALL_LUCENE_FIELDS = new LuceneField() {
-        @Override
-        public SortField.Type getSortType() {
-            return null;
-        }
+    byte[] serialize(FieldDoc doc);
 
-        @Override
-        public String getName() {
-            return "*";
-        }
-    };
-
-    SortField.Type getSortType();
+    /**
+     * Deserializes the bytes back to a FieldDoc.
+     *
+     * @param bytes the serialized bytes of a FieldDoc
+     * @return the deserialized FieldDoc
+     */
+    FieldDoc deserialize(byte[] bytes);
 
 }

@@ -27,15 +27,18 @@ import com.tripod.api.query.result.QueryResults;
 import com.tripod.api.query.service.QueryException;
 import com.tripod.api.query.service.QueryService;
 import com.tripod.solr.example.ExampleField;
-import com.tripod.solr.example.query.ExampleSummary;
+import com.tripod.solr.example.ExampleSummary;
 import com.tripod.solr.example.query.ExampleSummaryQuery;
 import com.tripod.solr.example.query.ExampleSummaryQueryService;
+import org.apache.solr.common.params.CursorMarkParams;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -49,7 +52,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestExampleSummaryQueryService extends TestExampleBase {
 
-    private QueryService<Query,ExampleSummary> queryService;
+    private QueryService<ExampleSummary> queryService;
 
     @Before
     public void setup() {
@@ -243,7 +246,7 @@ public class TestExampleSummaryQueryService extends TestExampleBase {
     }
 
     @Test
-    public void testPaging() throws QueryException {
+    public void testPagingWithOffset() throws QueryException {
         int offset = 0;
         int pageSize = 2;
 
@@ -281,6 +284,49 @@ public class TestExampleSummaryQueryService extends TestExampleBase {
         assertEquals(5, results.getTotalResults());
         assertEquals(offset, results.getOffset());
         assertEquals(pageSize, results.getPageSize());
+    }
+
+    @Test
+    public void testPagingWithCursorMark() throws QueryException {
+        int pageSize = 2;
+        String cursorMark = CursorMarkParams.CURSOR_MARK_START;
+
+        boolean done = false;
+        List<String> ids = new ArrayList<>();
+
+        // page through until the returned cursorMark is equal to the previous cursorMark
+
+        while (!done) {
+            // required to include a sort on the uniqueKey field to use cursorMark
+            Query query = new ExampleSummaryQuery("*:*", cursorMark, pageSize);
+            query.addSort(ExampleField.CREATE_DATE, SortOrder.DESC);
+            query.addSort(ExampleField.ID, SortOrder.ASC);
+
+            QueryResults<ExampleSummary> results = queryService.search(query);
+
+            assertNotNull(results);
+            assertNotNull(results.getResults());
+            assertTrue(results.getResults().size() <= pageSize);
+            assertEquals(5, results.getTotalResults());
+            assertEquals(0, results.getOffset());
+            assertEquals(pageSize, results.getPageSize());
+            assertNotNull(results.getCursorMark());
+
+            results.getResults().stream().forEach(r -> ids.add(r.getId()));
+
+            if (results.getCursorMark().equals(cursorMark)) {
+                done = true;
+            }
+
+            cursorMark = results.getCursorMark();
+        }
+
+        // verify we got ids 1-5 in order
+        assertEquals(5, ids.size());
+        for (int i=0; i < 5; i++) {
+            assertEquals(String.valueOf(5-i), ids.get(i));
+        }
+
     }
 
 }

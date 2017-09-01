@@ -16,7 +16,6 @@
  */
 package com.tripod.solr.query;
 
-import com.tripod.api.query.Query;
 import com.tripod.api.query.QueryTransformer;
 import org.apache.solr.client.solrj.SolrQuery;
 
@@ -25,6 +24,6 @@ import org.apache.solr.client.solrj.SolrQuery;
  *
  * @author bbende
  */
-public interface SolrQueryTransformer<Q extends Query> extends QueryTransformer<Q,SolrQuery> {
+public interface SolrQueryTransformer extends QueryTransformer<SolrQuery> {
 
 }

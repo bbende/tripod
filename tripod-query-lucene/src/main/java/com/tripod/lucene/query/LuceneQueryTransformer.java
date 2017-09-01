@@ -16,16 +16,13 @@
  */
 package com.tripod.lucene.query;
 
-import com.tripod.api.query.Query;
 import com.tripod.api.query.QueryTransformer;
-import com.tripod.lucene.LuceneField;
 
 /**
  * Produces Lucene Query instances from the provided Tripod Query.
  *
  * @author bbende
  */
-public interface LuceneQueryTransformer<Q extends Query<LuceneField>>
-        extends QueryTransformer<Q, org.apache.lucene.search.Query> {
+public interface LuceneQueryTransformer extends QueryTransformer<org.apache.lucene.search.Query> {
 
 }

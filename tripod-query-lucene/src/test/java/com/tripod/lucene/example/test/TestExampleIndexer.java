@@ -17,18 +17,20 @@
 package com.tripod.lucene.example.test;
 
 import com.tripod.api.index.IndexException;
+import com.tripod.api.query.Query;
 import com.tripod.api.query.Sort;
 import com.tripod.api.query.SortOrder;
+import com.tripod.api.query.result.FacetCount;
+import com.tripod.api.query.result.FacetResult;
 import com.tripod.api.query.result.QueryResults;
 import com.tripod.api.query.service.QueryException;
+import com.tripod.api.query.service.QueryService;
 import com.tripod.lucene.example.Example;
 import com.tripod.lucene.example.ExampleField;
+import com.tripod.lucene.example.ExampleSummary;
 import com.tripod.lucene.example.index.ExampleIndexer;
-import com.tripod.lucene.example.query.ExampleSummary;
 import com.tripod.lucene.example.query.ExampleSummaryQueryService;
 import com.tripod.lucene.index.LuceneIndexer;
-import com.tripod.lucene.query.LuceneQuery;
-import com.tripod.lucene.query.service.LuceneQueryService;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.facet.FacetsConfig;
@@ -46,9 +48,11 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for ExampleIndexer.
@@ -107,11 +111,12 @@ public class TestExampleIndexer {
 
         SearcherManager searcherManager = new SearcherManager(directory, null);
 
-        LuceneQueryService<LuceneQuery,ExampleSummary> queryService =
+        QueryService<ExampleSummary> queryService =
                 new ExampleSummaryQueryService(searcherManager, DEFAULT_FIELD, analyzer, facetsConfig);
 
-        LuceneQuery query = new LuceneQuery("*:*");
+        Query query = new Query("*:*");
         query.setSorts(Arrays.asList(new Sort(ExampleField.ID, SortOrder.ASC)));
+        query.addFacetField(ExampleField.COLOR);
 
         QueryResults<ExampleSummary> results = queryService.search(query);
 
@@ -130,6 +135,74 @@ public class TestExampleIndexer {
         assertEquals(e2.getTitle(), result2.getTitle());
         assertEquals(e2.getColor(), result2.getColor());
         assertEquals(e2.getCreateDate(), result2.getCreateDate());
+
+        final List<FacetResult> facetResults = results.getFacetResults();
+        assertEquals(1, facetResults.size());
+
+        final List<FacetCount> facetCounts = facetResults.get(0).getFacetCounts();
+        assertEquals(2, facetCounts.size());
+
+        verifyFacetValuesExist(facetCounts, "BLUE", "RED");
+
+        // now update one of the examples
+        final Example e2updated = new Example("2");
+        e2updated.setBody("Body of e2 updated");
+        e2updated.setTitle("Title of e2 updated");
+        e2updated.setColor("GREEN");
+        e2updated.setCreateDate(new Date());
+        indexer.update(e2updated);
+        indexer.commit();
+
+        // refresh the searcher
+        searcherManager.maybeRefreshBlocking();
+
+        // query again and verify the update took place
+        QueryResults<ExampleSummary> updatedResults = queryService.search(query);
+
+        assertNotNull(updatedResults);
+        assertNotNull(updatedResults.getResults());
+        assertEquals(2, updatedResults.getResults().size());
+
+        final ExampleSummary updatedResult2 = updatedResults.getResults().get(1);
+        assertEquals(e2updated.getId(), updatedResult2.getId());
+        assertEquals(e2updated.getTitle(), updatedResult2.getTitle());
+        assertEquals(e2updated.getColor(), updatedResult2.getColor());
+        assertEquals(e2updated.getCreateDate(), updatedResult2.getCreateDate());
+
+        final List<FacetResult> updatedFacetResults = updatedResults.getFacetResults();
+        assertEquals(1, updatedFacetResults.size());
+
+        final List<FacetCount> updatedFacetCounts = updatedFacetResults.get(0).getFacetCounts();
+        assertEquals(2, updatedFacetCounts.size());
+
+        verifyFacetValuesExist(updatedFacetCounts, "BLUE", "GREEN");
+
+        // now delete the docs
+        indexer.delete(e1);
+        indexer.delete(e2);
+        indexer.commit();
+
+        // refresh the searcher
+        searcherManager.maybeRefreshBlocking();
+
+        // query again and verify the deletes took place
+        QueryResults<ExampleSummary> emptyResults = queryService.search(query);
+        assertNotNull(emptyResults);
+        assertNotNull(emptyResults.getResults());
+        assertEquals(0, emptyResults.getResults().size());
+    }
+
+    private void verifyFacetValuesExist(List<FacetCount> facetCounts, String ...facetValues) {
+        for (String facetValue : facetValues) {
+            boolean found = false;
+            for (FacetCount facetCount : facetCounts) {
+                if (facetCount.getValue().equals(facetValue)) {
+                    found = true;
+                    break;
+                }
+            }
+            assertTrue(found);
+        }
     }
 
 }

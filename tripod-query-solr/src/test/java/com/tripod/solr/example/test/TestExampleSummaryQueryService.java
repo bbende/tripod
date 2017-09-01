@@ -17,6 +17,7 @@
 package com.tripod.solr.example.test;
 
 import com.tripod.api.Field;
+import com.tripod.api.query.FilterQuery;
 import com.tripod.api.query.Query;
 import com.tripod.api.query.Sort;
 import com.tripod.api.query.SortOrder;
@@ -169,6 +170,24 @@ public class TestExampleSummaryQueryService extends TestExampleBase {
         assertTrue(foundBlue);
         assertTrue(foundRed);
         assertTrue(foundGreen);
+
+        // Now drill down to a specific facet
+
+        Query drillDownQuery = new ExampleSummaryQuery("*:*");
+        drillDownQuery.addFacetField(ExampleField.COLOR);
+
+        FilterQuery filterQuery = new FilterQuery(ExampleField.COLOR, "GREEN");
+        drillDownQuery.addFilterQuery(filterQuery);
+
+        QueryResults<ExampleSummary> drillDownResults = queryService.search(drillDownQuery);
+
+        assertNotNull(drillDownResults);
+        assertNotNull(drillDownResults.getResults());
+        assertEquals(1, drillDownResults.getResults().size());
+
+        final ExampleSummary exampleSummary = drillDownResults.getResults().get(0);
+        assertNotNull(exampleSummary);
+        assertEquals("GREEN", exampleSummary.getColor());
     }
 
     @Test
@@ -191,7 +210,7 @@ public class TestExampleSummaryQueryService extends TestExampleBase {
     @Test
     public void testFilterQueries() throws QueryException {
         Query query = new ExampleSummaryQuery("*:*");
-        query.setFilterQueries(Arrays.asList(ExampleField.COLOR.getName() + ":BLUE"));
+        query.addFilterQuery(new FilterQuery(ExampleField.COLOR, "BLUE"));
 
         QueryResults<ExampleSummary> results = queryService.search(query);
 

@@ -16,6 +16,7 @@
  */
 package com.tripod.lucene.example.test;
 
+import com.tripod.api.query.FilterQuery;
 import com.tripod.api.query.Sort;
 import com.tripod.api.query.SortOrder;
 import com.tripod.api.query.result.FacetCount;
@@ -66,7 +67,7 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
 
     @Before
     public void setup() {
-        this.queryService = new ExampleSummaryQueryService(searcherManager, defaultField, analyzer);
+        this.queryService = new ExampleSummaryQueryService(searcherManager, defaultField, analyzer, facetsConfig);
     }
 
     /**
@@ -197,6 +198,24 @@ public class TestExampleSummaryQueryService extends TestExampleLuceneBase {
         assertTrue(foundBlue);
         assertTrue(foundRed);
         assertTrue(foundGreen);
+
+        // Now drill down to a specific facet
+
+        LuceneQuery drillDownQuery = new LuceneQuery("*:*");
+        drillDownQuery.addFacetField(ExampleField.COLOR);
+
+        FilterQuery filterQuery = new FilterQuery(ExampleField.COLOR, "GREEN");
+        drillDownQuery.addFilterQuery(filterQuery);
+
+        QueryResults<ExampleSummary> drillDownResults = queryService.search(drillDownQuery);
+
+        assertNotNull(drillDownResults);
+        assertNotNull(drillDownResults.getResults());
+        assertEquals(1, drillDownResults.getResults().size());
+
+        final ExampleSummary exampleSummary = drillDownResults.getResults().get(0);
+        assertNotNull(exampleSummary);
+        assertEquals("GREEN", exampleSummary.getColor());
     }
 
     @Test

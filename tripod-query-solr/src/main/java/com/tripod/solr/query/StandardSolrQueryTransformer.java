@@ -58,7 +58,7 @@ public class StandardSolrQueryTransformer<Q extends Query<Field>> implements Sol
         }
 
         if (query.getFilterQueries() != null) {
-            query.getFilterQueries().stream().forEach(fq -> solrQuery.addFilterQuery(fq));
+            query.getFilterQueries().stream().forEach(fq -> solrQuery.addFilterQuery(fq.getField().getName() + ":" + fq.getValue()));
         }
 
         if (query.getParams() != null) {

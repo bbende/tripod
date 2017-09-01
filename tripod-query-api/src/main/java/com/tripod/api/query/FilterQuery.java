@@ -14,37 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.tripod.solr.example.query;
+package com.tripod.api.query;
 
-import com.tripod.api.query.Query;
-import com.tripod.solr.example.ExampleField;
-
-import java.util.Arrays;
+import com.tripod.api.Field;
+import org.apache.commons.lang.Validate;
 
 /**
- * Example of extending Query to define common parameters for a type of query.
+ * A standard filter query consisting of a field to filter on and a value.
  *
  * @author bbende
  */
-public class ExampleSummaryQuery extends Query<ExampleField> {
+public class FilterQuery<F extends Field> {
 
-    public ExampleSummaryQuery(String query) {
-        super(query);
-        init();
+    private final F field;
+
+    private final String value;
+
+    public FilterQuery(final F field, final String value) {
+        this.field = field;
+        this.value = value;
+        Validate.notNull(field);
+        Validate.notNull(value);
     }
 
-    public ExampleSummaryQuery(String query, Integer offset, Integer rows) {
-        super(query, offset, rows);
-        init();
+    public F getField() {
+        return field;
     }
 
-    private void init() {
-        setReturnFields(Arrays.asList(
-                ExampleField.ID,
-                ExampleField.TITLE,
-                ExampleField.COLOR,
-                ExampleField.CREATE_DATE
-        ));
+    public String getValue() {
+        return value;
     }
 
 }

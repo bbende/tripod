@@ -18,10 +18,8 @@ package com.tripod.lucene.example.test;
 
 import com.tripod.api.query.service.QueryException;
 import com.tripod.lucene.example.Example;
-import com.tripod.lucene.example.query.ExampleDocumentTransformer;
 import com.tripod.lucene.example.query.ExampleRetrievalService;
 import com.tripod.lucene.query.LuceneRetrievalQuery;
-import com.tripod.lucene.query.StandardLuceneQueryTransformer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,9 +38,7 @@ public class TestExampleRetrievalService extends TestExampleLuceneBase {
 
     @Before
     public void setup() {
-        this.retrievalService = new ExampleRetrievalService(searcherManager, analyzer,
-                new StandardLuceneQueryTransformer<>(defaultField, analyzer),
-                new ExampleDocumentTransformer());
+        this.retrievalService = new ExampleRetrievalService(searcherManager, defaultField, analyzer);
     }
 
     @Test

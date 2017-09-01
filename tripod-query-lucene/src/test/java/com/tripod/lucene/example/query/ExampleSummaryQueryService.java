@@ -20,6 +20,7 @@ import com.tripod.lucene.query.LuceneQuery;
 import com.tripod.lucene.query.StandardLuceneQueryTransformer;
 import com.tripod.lucene.query.service.LuceneQueryService;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.search.SearcherManager;
 
 /**
@@ -31,9 +32,10 @@ public class ExampleSummaryQueryService extends LuceneQueryService<LuceneQuery,E
 
     public ExampleSummaryQueryService(final SearcherManager searcherManager,
                                       final String defaultField,
-                                      final Analyzer analyzer) {
+                                      final Analyzer analyzer,
+                                      final FacetsConfig facetsConfig) {
         super(searcherManager, analyzer,
-                new StandardLuceneQueryTransformer<>(defaultField, analyzer),
+                new StandardLuceneQueryTransformer<>(defaultField, analyzer, facetsConfig),
                 new ExampleSummaryTransformer());
     }
 

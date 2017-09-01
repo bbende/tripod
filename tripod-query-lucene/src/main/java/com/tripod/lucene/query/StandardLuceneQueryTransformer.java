@@ -18,6 +18,8 @@ package com.tripod.lucene.query;
 
 import com.tripod.api.query.QueryTransformException;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.facet.DrillDownQuery;
+import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 
@@ -30,17 +32,34 @@ public class StandardLuceneQueryTransformer<Q extends LuceneQuery> implements Lu
 
     private final String defaultField;
     private final Analyzer analyzer;
+    private final FacetsConfig facetsConfig;
 
     public StandardLuceneQueryTransformer(final String defaultField, final Analyzer analyzer) {
+        this(defaultField, analyzer, null);
+    }
+
+    public StandardLuceneQueryTransformer(final String defaultField, final Analyzer analyzer, final FacetsConfig facetsConfig) {
         this.defaultField = defaultField;
         this.analyzer = analyzer;
+        this.facetsConfig = facetsConfig;
     }
 
     @Override
     public org.apache.lucene.search.Query transform(Q input) throws QueryTransformException {
         try {
             org.apache.lucene.search.Query luceneQuery = new QueryParser(defaultField, analyzer).parse(input.getQuery());
-            return luceneQuery;
+
+            if (input.getFilterQueries() == null || facetsConfig == null) {
+                return luceneQuery;
+            }
+
+            // wrap the original query in a DrillDownQuery
+            DrillDownQuery drillDownQuery = new DrillDownQuery(facetsConfig, luceneQuery);
+
+            // add all the filter queries to the DrillDownQuery
+            input.getFilterQueries().stream().forEach(fq -> drillDownQuery.add(fq.getField().getName(), fq.getValue()));
+            return drillDownQuery;
+
         } catch (ParseException e) {
             throw new QueryTransformException(e.getMessage(), e);
         }

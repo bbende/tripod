@@ -17,9 +17,8 @@
 package com.tripod.lucene.example.query;
 
 import com.tripod.lucene.example.Example;
-import com.tripod.lucene.query.LuceneQueryTransformer;
 import com.tripod.lucene.query.LuceneRetrievalQuery;
-import com.tripod.lucene.query.service.LuceneDocumentTransformer;
+import com.tripod.lucene.query.StandardLuceneQueryTransformer;
 import com.tripod.lucene.query.service.LuceneRetrievalService;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.search.SearcherManager;
@@ -31,10 +30,11 @@ import org.apache.lucene.search.SearcherManager;
  */
 public class ExampleRetrievalService extends LuceneRetrievalService<LuceneRetrievalQuery,Example> {
 
-    public ExampleRetrievalService(SearcherManager searcherManager,
-                                   Analyzer analyzer,
-                                   LuceneQueryTransformer<LuceneRetrievalQuery> queryTransformer,
-                                   LuceneDocumentTransformer<Example> documentTransformer) {
-        super(searcherManager, analyzer, queryTransformer, documentTransformer);
+    public ExampleRetrievalService(final SearcherManager searcherManager,
+                                   final String defaultField,
+                                   final Analyzer analyzer) {
+        super(searcherManager, analyzer,
+                new StandardLuceneQueryTransformer<>(defaultField, analyzer),
+                new ExampleDocumentTransformer());
     }
 }

@@ -108,7 +108,7 @@ public class TestExampleIndexer {
         SearcherManager searcherManager = new SearcherManager(directory, null);
 
         LuceneQueryService<LuceneQuery,ExampleSummary> queryService =
-                new ExampleSummaryQueryService(searcherManager, DEFAULT_FIELD, analyzer);
+                new ExampleSummaryQueryService(searcherManager, DEFAULT_FIELD, analyzer, facetsConfig);
 
         LuceneQuery query = new LuceneQuery("*:*");
         query.setSorts(Arrays.asList(new Sort(ExampleField.ID, SortOrder.ASC)));

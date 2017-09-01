@@ -19,6 +19,7 @@ package com.tripod.api.query;
 import com.tripod.api.Field;
 import org.apache.commons.lang.Validate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,7 @@ public class Query<F extends Field> {
     private List<F> highlightFields;
     private List<F> facetFields;
 
-    private List<String> filterQueries;
+    private List<FilterQuery<F>> filterQueries;
     private List<Sort<F>> sorts;
 
     private Map<String,String> params = new HashMap<>();
@@ -103,12 +104,26 @@ public class Query<F extends Field> {
         this.facetFields = facetFields;
     }
 
-    public List<String> getFilterQueries() {
+    public void addFacetField(F field) {
+        if (this.facetFields == null) {
+            this.facetFields = new ArrayList<>();
+        }
+        this.facetFields.add(field);
+    }
+
+    public List<FilterQuery<F>> getFilterQueries() {
         return filterQueries;
     }
 
-    public void setFilterQueries(List<String> filterQueries) {
+    public void setFilterQueries(List<FilterQuery<F>> filterQueries) {
         this.filterQueries = filterQueries;
+    }
+
+    public void addFilterQuery(FilterQuery<F> fq) {
+        if (this.filterQueries == null) {
+            this.filterQueries = new ArrayList<>();
+        }
+        this.filterQueries.add(fq);
     }
 
     public List<Sort<F>> getSorts() {

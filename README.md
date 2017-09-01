@@ -101,7 +101,7 @@ Creates an abstraction layer between the application and the underlying search p
 
         public class FooQueryService extends SolrQueryService<Query,Foo> {
             public FooQueryService(SolrClient solrClient) {
-                super(solrClient, new StandardSolrQueryFactory<>(), new FooTransformer());
+                super(solrClient, new StandardSolrQueryTransformer<>(), new FooTransformer());
             }
         }
 
@@ -184,9 +184,10 @@ NOTE: Lucene support is not part of the Tripod 0.1.0 release.
     
 5) Create a query service that extends LuceneQueryService and uses the transformer above:
 
-        public FooQueryService(final SearcherManager searcherManager, final String defaultField, final Analyzer analyzer) {
+        public FooQueryService(final SearcherManager searcherManager, final String defaultField, 
+                                final Analyzer analyzer, final FacetsConfig facetsConfig) {
                 super(searcherManager, analyzer,
-                        new StandardLuceneQueryTransformer<>(defaultField, analyzer),
+                        new StandardLuceneQueryTransformer<>(defaultField, analyzer, facetsConfig),
                         new FooTransformer());
             }
 

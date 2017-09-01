@@ -21,8 +21,6 @@ import com.tripod.lucene.LuceneField;
 import org.apache.commons.lang.Validate;
 import org.apache.lucene.search.ScoreDoc;
 
-import java.util.List;
-
 /**
  * Lucene specific Query.
  *
@@ -66,15 +64,4 @@ public class LuceneQuery extends Query<LuceneField> {
         Validate.notNull(highlightPostTag);
         this.highlightPostTag = highlightPostTag;
     }
-
-    @Override
-    public List<String> getFilterQueries() {
-        throw new UnsupportedOperationException("Filter Queries are not supported for Lucene Implementation");
-    }
-
-    @Override
-    public void setFilterQueries(List<String> filterQueries) {
-        throw new UnsupportedOperationException("Filter Queries are not supported for Lucene Implementation");
-    }
-
 }

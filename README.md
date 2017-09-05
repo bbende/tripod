@@ -20,11 +20,11 @@ Creates an abstraction layer between the application and the underlying search p
 
 # Overview
 
-**tripod-query-api** provides a generic API for interacting with a Lucene based search platform.
+**tripod-search-api** provides a generic API for interacting with a Lucene based search platform.
 
-**tripod-query-solr** provides a Solr based implementation of the API.
+**tripod-search-solr** provides a Solr based implementation of the API.
 
-**tripod-query-lucene** provides a Lucene based implementation of the API.
+**tripod-search-lucene** provides a Lucene based implementation of the API.
 
 # Maven Repository for Released Artifacts
 
@@ -41,11 +41,11 @@ Creates an abstraction layer between the application and the underlying search p
 
 # How can I use this in my application with Solr?
 
-1) Add a Maven dependency on tripod-query-solr:
+1) Add a Maven dependency ontripod-search-solr:
   
         <dependency>
           <groupId>com.tripod</groupId>
-          <artifactId>tripod-query-solr</artifactId>
+          <artifactId>tripod-search-solr</artifactId>
           <version>${tripod.version}</version>
         </dependency>
     
@@ -114,17 +114,17 @@ Creates an abstraction layer between the application and the underlying search p
         QueryResults<Foo> results = queryService.search(query);
     
     
-For additional information see the example in [tripod-query-solr/src/test/java](https://github.com/bbende/tripod/tree/master/tripod-query-solr/src/test/java/com/tripod/solr/example).
+For additional information see the example in [tripod-search-solr/src/test/java](https://github.com/bbende/tripod/tree/master/tripod-search-solr/src/test/java/com/tripod/solr/example).
 
 # How can I use this in my application with Lucene?
 
 NOTE: Lucene support is not part of the Tripod 0.1.0 release.
 
-1) Add a Maven dependency on tripod-query-lucene:
+1) Add a Maven dependency on tripod-search-lucene:
 
         <dependency>
           <groupId>com.tripod</groupId>
-          <artifactId>tripod-query-lucene</artifactId>
+          <artifactId>tripod-search-lucene</artifactId>
           <version>${tripod.version}</version>
         </dependency>
     
@@ -218,7 +218,7 @@ NOTE: Lucene support is not part of the Tripod 0.1.0 release.
         QueryResults<Foo> results = queryService.search(query);
     
     
-For additional information see the example in [tripod-query-lucene/src/test/java](https://github.com/bbende/tripod/tree/master/tripod-query-lucene/src/test/java/com/tripod/lucene/example).
+For additional information see the example in [tripod-search-lucene/src/test/java](https://github.com/bbende/tripod/tree/master/tripod-search-lucene/src/test/java/com/tripod/lucene/example).
 
 # Release Instructions
 

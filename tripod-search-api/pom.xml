@@ -17,7 +17,7 @@ language governing permissions and limitations under the License. -->
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>tripod-query-api</artifactId>
+    <artifactId>tripod-search-api</artifactId>
 
     <dependencies>
         <dependency>

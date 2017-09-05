@@ -44,9 +44,9 @@ language governing permissions and limitations under the License. -->
     </distributionManagement>
 
     <modules>
-        <module>tripod-query-api</module>
-        <module>tripod-query-solr</module>
-	    <module>tripod-query-lucene</module>
+        <module>tripod-search-api</module>
+        <module>tripod-search-solr</module>
+	<module>tripod-search-lucene</module>
     </modules>
 
     <properties>

@@ -199,10 +199,11 @@ NOTE: Lucene support is not part of the Tripod 0.1.0 release.
 
         public FooQueryService(final SearcherManager searcherManager, final String defaultField, 
                                final Analyzer analyzer, final FacetsConfig facetsConfig) 
-                               extends LuceneQueryService<Foo> {
+                           extends LuceneQueryService<Foo> {
                 super(searcherManager, analyzer,
                         new StandardLuceneQueryTransformer(defaultField, analyzer, facetsConfig),
-                        new FooTransformer());
+                        new FooTransformer(),
+                        new FooFieldSortTypeFactory());
             }
 
 6) Initialize the query service with the appropriate SeacherManager, Analyzer, and default field, and perform queries:
@@ -222,8 +223,8 @@ For additional information see the example in [tripod-search-lucene/src/test/jav
 
 # Release Instructions
 
-    mvn release:prepare -DdryRun=true -Pfull,sign
+    mvn release:prepare -DdryRun=true -Pfull,sign -Dgpg.keyname=<your_key>
     mvn release:clean
-    mvn release:prepare -Pfull
-    mvn release:perform -Pfull
+    mvn release:prepare -Pfull,sign -Dgpg.keyname=<your_key>
+    mvn release:perform -Pfull,sign -Dgpg.keyname=<your_key>
     git push --all && git push --tags

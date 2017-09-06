@@ -44,7 +44,7 @@ Creates an abstraction layer between the application and the underlying search p
 1) Add a Maven dependency ontripod-search-solr:
   
         <dependency>
-          <groupId>com.tripod</groupId>
+          <groupId>com.bbende.tripod</groupId>
           <artifactId>tripod-search-solr</artifactId>
           <version>${tripod.version}</version>
         </dependency>
@@ -123,7 +123,7 @@ NOTE: Lucene support is not part of the Tripod 0.1.0 release.
 1) Add a Maven dependency on tripod-search-lucene:
 
         <dependency>
-          <groupId>com.tripod</groupId>
+          <groupId>com.bbende.tripod</groupId>
           <artifactId>tripod-search-lucene</artifactId>
           <version>${tripod.version}</version>
         </dependency>

@@ -14,25 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.bbende.tripod.lucene.example.index;
+package com.bbende.tripod.lucene.index;
 
-import com.bbende.tripod.lucene.example.Example;
-import com.bbende.tripod.lucene.index.LuceneIndexer;
-import org.apache.lucene.facet.FacetsConfig;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.store.Directory;
+import com.bbende.tripod.api.entity.Entity;
+import com.bbende.tripod.api.index.Indexer;
 
 /**
- * LuceneIndexer for Example entities.
- *
  * @author bbende
  */
-public class ExampleIndexer extends LuceneIndexer<Example> {
+public interface LuceneTransaction<E extends Entity> extends Indexer<E> {
 
-    public ExampleIndexer(final Directory directory,
-                          final IndexWriterConfig indexWriterConfig,
-                          final FacetsConfig facetsConfig) {
-        super(directory, indexWriterConfig, facetsConfig, new ExampleIndexTransformer());
-    }
+    void rollback();
 
 }

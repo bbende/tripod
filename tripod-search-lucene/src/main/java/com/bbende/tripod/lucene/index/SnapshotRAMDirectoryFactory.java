@@ -14,25 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.bbende.tripod.lucene.example.index;
+package com.bbende.tripod.lucene.index;
 
-import com.bbende.tripod.lucene.example.Example;
-import com.bbende.tripod.lucene.index.LuceneIndexer;
-import org.apache.lucene.facet.FacetsConfig;
-import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
 
 /**
- * LuceneIndexer for Example entities.
+ * SnapshotDirectoryFactory that creates RAMDirectory instances.
  *
  * @author bbende
  */
-public class ExampleIndexer extends LuceneIndexer<Example> {
+public class SnapshotRAMDirectoryFactory implements SnapshotDirectoryFactory {
 
-    public ExampleIndexer(final Directory directory,
-                          final IndexWriterConfig indexWriterConfig,
-                          final FacetsConfig facetsConfig) {
-        super(directory, indexWriterConfig, facetsConfig, new ExampleIndexTransformer());
+    @Override
+    public Directory createSnapshotDirectory() {
+        return new RAMDirectory();
     }
 
 }

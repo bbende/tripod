@@ -17,28 +17,14 @@
 package com.bbende.tripod.lucene.example.test;
 
 import com.bbende.tripod.api.index.IndexException;
-import com.bbende.tripod.api.query.Query;
-import com.bbende.tripod.api.query.Sort;
-import com.bbende.tripod.api.query.SortOrder;
 import com.bbende.tripod.api.query.result.FacetCount;
 import com.bbende.tripod.api.query.result.FacetResult;
 import com.bbende.tripod.api.query.result.QueryResults;
 import com.bbende.tripod.api.query.service.QueryException;
-import com.bbende.tripod.api.query.service.QueryService;
 import com.bbende.tripod.lucene.example.Example;
-import com.bbende.tripod.lucene.example.ExampleField;
 import com.bbende.tripod.lucene.example.ExampleSummary;
 import com.bbende.tripod.lucene.example.index.ExampleIndexer;
-import com.bbende.tripod.lucene.example.query.ExampleSummaryQueryService;
 import com.bbende.tripod.lucene.index.LuceneIndexer;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.facet.FacetsConfig;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.search.SearcherManager;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.IOUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -46,7 +32,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -59,66 +44,31 @@ import static org.junit.Assert.assertTrue;
  *
  * @author bbende
  */
-public class TestExampleIndexer {
-
-    static final String DEFAULT_FIELD = ExampleField.BODY.getName();
-
-    private Analyzer analyzer;
-    private Directory directory;
-    private FacetsConfig facetsConfig;
-    private IndexWriter indexWriter;
+public class TestExampleIndexer extends TestIndexerBase {
 
     private LuceneIndexer<Example> indexer;
 
     @Before
-    public void setup() throws IOException {
-        analyzer = new StandardAnalyzer();
-        directory = new RAMDirectory();
-
-        facetsConfig = new FacetsConfig();
-        facetsConfig.setIndexFieldName(ExampleField.COLOR.getName(), ExampleField.COLOR.getName());
-
-        final IndexWriterConfig config = new IndexWriterConfig(analyzer);
-        indexWriter = new IndexWriter(directory, config);
-        indexer = new ExampleIndexer(indexWriter, facetsConfig);
+    public void setup() throws IndexException {
+        indexer = new ExampleIndexer(directory, indexWriterConfig, facetsConfig);
+        indexer.open();
     }
 
     @After
     public void cleanup() throws IOException {
-        IOUtils.closeWhileHandlingException(indexWriter);
-        IOUtils.closeWhileHandlingException(directory);
+        IOUtils.closeWhileHandlingException(indexer);
     }
 
     @Test
     public void testIndexExamples() throws IndexException, QueryException, ParseException, IOException {
-        final Example e1 = new Example("1");
-        e1.setBody("Body of e1");
-        e1.setTitle("Title of e1");
-        e1.setColor("BLUE");
-        e1.setCreateDate(new Date());
-        indexer.index(e1);
-
-        final Example e2 = new Example("2");
-        e2.setBody("Body of e2");
-        e2.setTitle("Title of e2");
-        e2.setColor("RED");
-        e2.setCreateDate(new Date());
-        indexer.index(e2);
-
+        // index some example entities
+        final Example e1 = indexExample(indexer, "1", "BLUE");
+        final Example e2 = indexExample(indexer, "2", "RED");
         indexer.commit();
 
         // now verify the correct docs exist
 
-        SearcherManager searcherManager = new SearcherManager(directory, null);
-
-        QueryService<ExampleSummary> queryService =
-                new ExampleSummaryQueryService(searcherManager, DEFAULT_FIELD, analyzer, facetsConfig);
-
-        Query query = new Query("*:*");
-        query.setSorts(Arrays.asList(new Sort(ExampleField.ID, SortOrder.ASC)));
-        query.addFacetField(ExampleField.COLOR);
-
-        QueryResults<ExampleSummary> results = queryService.search(query);
+        QueryResults<ExampleSummary> results = queryAllDocs();
 
         assertNotNull(results);
         assertNotNull(results.getResults());
@@ -153,11 +103,8 @@ public class TestExampleIndexer {
         indexer.update(e2updated);
         indexer.commit();
 
-        // refresh the searcher
-        searcherManager.maybeRefreshBlocking();
-
         // query again and verify the update took place
-        QueryResults<ExampleSummary> updatedResults = queryService.search(query);
+        QueryResults<ExampleSummary> updatedResults = queryAllDocs();
 
         assertNotNull(updatedResults);
         assertNotNull(updatedResults.getResults());
@@ -182,11 +129,8 @@ public class TestExampleIndexer {
         indexer.delete(e2);
         indexer.commit();
 
-        // refresh the searcher
-        searcherManager.maybeRefreshBlocking();
-
         // query again and verify the deletes took place
-        QueryResults<ExampleSummary> emptyResults = queryService.search(query);
+        QueryResults<ExampleSummary> emptyResults = queryAllDocs();
         assertNotNull(emptyResults);
         assertNotNull(emptyResults.getResults());
         assertEquals(0, emptyResults.getResults().size());

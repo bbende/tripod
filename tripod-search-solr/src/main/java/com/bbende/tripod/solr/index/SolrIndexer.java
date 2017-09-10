@@ -23,6 +23,8 @@ import com.bbende.tripod.api.index.Indexer;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.SolrInputDocument;
 
+import java.io.IOException;
+
 /**
  * A service for adding entities to a Solr index.
  *
@@ -36,6 +38,11 @@ public class SolrIndexer<E extends Entity> implements Indexer<E> {
     public SolrIndexer(final SolrClient solrClient, final SolrIndexTransformer<E> solrIndexTransformer) {
         this.solrClient = solrClient;
         this.solrIndexTransformer = solrIndexTransformer;
+    }
+
+    @Override
+    public void open() throws IndexException {
+
     }
 
     @Override
@@ -90,5 +97,10 @@ public class SolrIndexer<E extends Entity> implements Indexer<E> {
         } catch (Exception e) {
             throw new IndexException("Unable to commit due to: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        solrClient.close();
     }
 }

@@ -17,22 +17,26 @@
 package com.bbende.tripod.lucene.example.index;
 
 import com.bbende.tripod.lucene.example.Example;
-import com.bbende.tripod.lucene.index.LuceneIndexer;
+import com.bbende.tripod.lucene.index.LuceneTransactionalIndexer;
+import com.bbende.tripod.lucene.index.SnapshotRAMDirectoryFactory;
 import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 
 /**
- * LuceneIndexer for Example entities.
+ * Transactional Lucene Indexer for Example entities.
  *
  * @author bbende
  */
-public class ExampleIndexer extends LuceneIndexer<Example> {
+public class ExampleTransactionalIndexer extends LuceneTransactionalIndexer<Example> {
 
-    public ExampleIndexer(final Directory directory,
-                          final IndexWriterConfig indexWriterConfig,
-                          final FacetsConfig facetsConfig) {
-        super(directory, indexWriterConfig, facetsConfig, new ExampleIndexTransformer());
+    public ExampleTransactionalIndexer(
+            final Directory directory,
+            final IndexWriterConfig indexWriterConfig,
+            final FacetsConfig facetsConfig) {
+        super(directory, indexWriterConfig, facetsConfig,
+                new SnapshotRAMDirectoryFactory(),
+                new ExampleIndexTransformer());
     }
 
 }

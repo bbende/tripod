@@ -25,7 +25,9 @@ import org.apache.commons.lang.Validate;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.store.Directory;
 
 import java.io.IOException;
 
@@ -36,46 +38,62 @@ import java.io.IOException;
  */
 public class LuceneIndexer<E extends Entity> implements Indexer<E> {
 
-    private final IndexWriter indexWriter;
-    private final FacetsConfig facetsConfig;
-    private final LuceneIndexTransformer<E> indexTransformer;
+    protected final Directory directory;
+    protected final IndexWriterConfig indexWriterConfig;
+    protected final FacetsConfig facetsConfig;
+    protected final LuceneIndexTransformer<E> indexTransformer;
 
-    public LuceneIndexer(final IndexWriter indexWriter,
+    protected volatile IndexWriter indexWriter;
+    protected volatile boolean opened = false;
+
+    public LuceneIndexer(final Directory directory,
+                         final IndexWriterConfig indexWriterConfig,
                          final LuceneIndexTransformer<E> indexTransformer) {
-        this(indexWriter, null, indexTransformer);
+        this(directory, indexWriterConfig, null, indexTransformer);
     }
 
-    public LuceneIndexer(final IndexWriter indexWriter,
+    public LuceneIndexer(final Directory directory,
+                         final IndexWriterConfig indexWriterConfig,
                          final FacetsConfig facetsConfig,
                          final LuceneIndexTransformer<E> indexTransformer) {
-        this.indexWriter = indexWriter;
+        this.directory = directory;
+        this.indexWriterConfig = indexWriterConfig;
         this.facetsConfig = facetsConfig;
         this.indexTransformer = indexTransformer;
-        Validate.notNull(indexWriter);
+        Validate.notNull(directory);
+        Validate.notNull(indexWriterConfig);
         Validate.notNull(indexTransformer);
     }
 
     @Override
-    public void index(final E entity) throws IndexException {
-        if (entity == null) {
-            return;
+    public synchronized void open() throws IndexException {
+        if (opened) {
+            throw new IllegalStateException("Indexer already opened");
         }
 
         try {
-            Document doc = indexTransformer.transform(entity);
-            if (facetsConfig != null) {
-                doc = facetsConfig.build(doc);
-            }
-
-            indexWriter.addDocument(doc);
-
-        } catch (IOException | TransformException e) {
-            throw new IndexException("Unable to index entity due to: " + e.getMessage(), e);
+            this.indexWriter = new IndexWriter(directory, indexWriterConfig);
+            this.opened = true;
+        } catch (IOException e) {
+            throw new IndexException("Unable to open Indexer due to: " + e.getMessage(), e);
         }
     }
 
     @Override
+    public void index(final E entity) throws IndexException {
+        ensureOpen();
+
+        if (entity == null) {
+            return;
+        }
+
+        update(entity);
+    }
+
+    @Override
     public void update(final E entity) throws IndexException {
+        ensureOpen();
+
         if (entity == null) {
             return;
         }
@@ -97,7 +115,9 @@ public class LuceneIndexer<E extends Entity> implements Indexer<E> {
     }
 
     @Override
-    public void delete(E entity) throws IndexException {
+    public void delete(final E entity) throws IndexException {
+        ensureOpen();
+
         if (entity == null) {
             return;
         }
@@ -106,7 +126,9 @@ public class LuceneIndexer<E extends Entity> implements Indexer<E> {
     }
 
     @Override
-    public void delete(Field idField, String id) throws IndexException {
+    public void delete(final Field idField, final String id) throws IndexException {
+        ensureOpen();
+
         if (idField == null) {
             throw new IllegalArgumentException("Id field cannot be null");
         }
@@ -125,10 +147,24 @@ public class LuceneIndexer<E extends Entity> implements Indexer<E> {
 
     @Override
     public void commit() throws IndexException {
+        ensureOpen();
         try {
             indexWriter.commit();
         } catch (IOException e) {
             throw new IndexException("Unable to commit due to: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public synchronized void close() throws IOException {
+        ensureOpen();
+        this.opened = false;
+        indexWriter.close();
+    }
+
+    private void ensureOpen() {
+        if (!opened) {
+            throw new IllegalStateException("Indexer must be opened");
         }
     }
 }

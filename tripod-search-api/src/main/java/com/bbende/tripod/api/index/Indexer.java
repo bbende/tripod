@@ -19,12 +19,21 @@ package com.bbende.tripod.api.index;
 import com.bbende.tripod.api.Field;
 import com.bbende.tripod.api.entity.Entity;
 
+import java.io.Closeable;
+
 /**
  * A service indexing entities.
  *
  * @author bbende
  */
-public interface Indexer<E extends Entity> {
+public interface Indexer<E extends Entity> extends Closeable {
+
+    /**
+     * Must be called after instantiating the Indexer and before performing any operations.
+     *
+     * @throws IndexException if an error occurs during initialization
+     */
+    void open() throws IndexException;
 
     /**
      * Adds the given entity to the index.

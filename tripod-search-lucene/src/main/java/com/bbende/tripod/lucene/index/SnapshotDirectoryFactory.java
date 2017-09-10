@@ -14,25 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.bbende.tripod.lucene.example.index;
+package com.bbende.tripod.lucene.index;
 
-import com.bbende.tripod.lucene.example.Example;
-import com.bbende.tripod.lucene.index.LuceneIndexer;
-import org.apache.lucene.facet.FacetsConfig;
-import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 
 /**
- * LuceneIndexer for Example entities.
+ * A factory for obtaining a Directory to be used for storing index snapshots.
  *
  * @author bbende
  */
-public class ExampleIndexer extends LuceneIndexer<Example> {
+public interface SnapshotDirectoryFactory {
 
-    public ExampleIndexer(final Directory directory,
-                          final IndexWriterConfig indexWriterConfig,
-                          final FacetsConfig facetsConfig) {
-        super(directory, indexWriterConfig, facetsConfig, new ExampleIndexTransformer());
-    }
+    Directory createSnapshotDirectory();
 
 }

@@ -39,7 +39,7 @@ language governing permissions and limitations under the License. -->
     <distributionManagement>
         <repository>
             <id>bbende-bintray-maven-repo</id>
-            <url>https://api.bintray.com/maven/bbende/maven-repo/tripod/;publish=1</url>
+            <url>https://api.bintray.com/maven/bbende/bbende-maven/tripod/;publish=1</url>
         </repository>
     </distributionManagement>
 

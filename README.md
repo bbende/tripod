@@ -33,9 +33,9 @@ Creates an abstraction layer between the application and the underlying search p
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-            <id>bintray-bbende-maven-repo</id>
+            <id>bintray-bbende-bbende-maven</id>
             <name>bintray</name>
-            <url>http://dl.bintray.com/bbende/maven-repo</url>
+            <url>https://dl.bintray.com/bbende/bbende-maven</url>
         </repository>
     </repositories>
 

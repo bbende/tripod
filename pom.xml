@@ -323,6 +323,9 @@ language governing permissions and limitations under the License. -->
                                     <goal>sign</goal>
                                 </goals>
                                 <phase>verify</phase>
+                                <configuration>
+                                    <keyname>${gpg.keyname}</keyname>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

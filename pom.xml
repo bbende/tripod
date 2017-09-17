@@ -17,6 +17,10 @@ language governing permissions and limitations under the License. -->
     <packaging>pom</packaging>
     <version>0.6.0-SNAPSHOT</version>
 
+    <name>tripod</name>
+    <description>A library for bootstrapping the development of search applications.</description>
+    <url>https://github.com/bbende/tripod</url>
+
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -25,17 +29,23 @@ language governing permissions and limitations under the License. -->
             <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
+
     <developers>
         <developer>
             <name>Bryan Bende</name>
+            <email>bbende@gmail.com</email>
+            <organization>bbende</organization>
+            <organizationUrl>https://github.com/bbende</organizationUrl>
         </developer>
     </developers>
+
     <scm>
         <connection>scm:git:git@github.com:bbende/tripod.git</connection>
         <developerConnection>scm:git:git@github.com:bbende/tripod.git</developerConnection>
         <tag>HEAD</tag>
         <url>git@github.com:bbende/tripod.git</url>
     </scm>
+
     <distributionManagement>
         <repository>
             <id>bbende-bintray-maven-repo</id>
@@ -46,7 +56,7 @@ language governing permissions and limitations under the License. -->
     <modules>
         <module>tripod-search-api</module>
         <module>tripod-search-solr</module>
-	<module>tripod-search-lucene</module>
+	    <module>tripod-search-lucene</module>
     </modules>
 
     <properties>
